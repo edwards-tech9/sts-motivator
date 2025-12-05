@@ -21,7 +21,7 @@ const BottomNav = ({ activeTab, onChangeTab, userRole }) => {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 z-50 pb-safe"
+      className="fixed bottom-0 left-0 right-0 bg-carbon-900/95 backdrop-blur-lg border-t border-slate-800 z-50 pb-safe"
       role="navigation"
       aria-label="Main navigation"
     >
@@ -33,8 +33,8 @@ const BottomNav = ({ activeTab, onChangeTab, userRole }) => {
             <button
               key={tab.id}
               onClick={() => onChangeTab(tab.id)}
-              className={`flex flex-col items-center py-2 px-4 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-orange-400 ${
-                isActive ? 'text-orange-400' : 'text-gray-500'
+              className={`flex flex-col items-center py-2 px-4 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-gold-400 ${
+                isActive ? 'text-gold-400' : 'text-gray-500'
               }`}
               aria-current={isActive ? 'page' : undefined}
               aria-label={tab.label}

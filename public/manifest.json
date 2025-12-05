@@ -4,8 +4,8 @@
   "description": "Personal training app for coaches and athletes",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#f97316",
+  "background_color": "#000000",
+  "theme_color": "#D4AF37",
   "orientation": "portrait",
   "icons": [
     {

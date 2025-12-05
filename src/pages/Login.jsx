@@ -86,7 +86,7 @@ const Login = ({ onSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-b from-carbon-900 via-carbon-950 to-black flex flex-col items-center justify-center p-6">
       {/* Logo */}
       <div className="mb-8 text-center">
         <img
@@ -113,13 +113,13 @@ const Login = ({ onSuccess }) => {
               onClick={() => setSelectedRole('athlete')}
               className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
                 selectedRole === 'athlete'
-                  ? 'border-orange-500 bg-orange-500/10'
-                  : 'border-slate-700 bg-slate-800/50 hover:border-slate-600'
+                  ? 'border-gold-500 bg-gold-500/10'
+                  : 'border-carbon-700 bg-carbon-800/50 hover:border-carbon-600'
               }`}
             >
               <Dumbbell
                 size={28}
-                className={selectedRole === 'athlete' ? 'text-orange-400' : 'text-gray-400'}
+                className={selectedRole === 'athlete' ? 'text-gold-400' : 'text-gray-400'}
               />
               <span className={selectedRole === 'athlete' ? 'text-white font-semibold' : 'text-gray-400'}>
                 Athlete
@@ -130,13 +130,13 @@ const Login = ({ onSuccess }) => {
               onClick={() => setSelectedRole('coach')}
               className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
                 selectedRole === 'coach'
-                  ? 'border-orange-500 bg-orange-500/10'
-                  : 'border-slate-700 bg-slate-800/50 hover:border-slate-600'
+                  ? 'border-gold-500 bg-gold-500/10'
+                  : 'border-carbon-700 bg-carbon-800/50 hover:border-carbon-600'
               }`}
             >
               <Users
                 size={28}
-                className={selectedRole === 'coach' ? 'text-orange-400' : 'text-gray-400'}
+                className={selectedRole === 'coach' ? 'text-gold-400' : 'text-gray-400'}
               />
               <span className={selectedRole === 'coach' ? 'text-white font-semibold' : 'text-gray-400'}>
                 Coach
@@ -147,7 +147,7 @@ const Login = ({ onSuccess }) => {
       )}
 
       {/* Form Card */}
-      <div className="w-full max-w-sm bg-slate-800/50 rounded-3xl p-6 border border-slate-700/50">
+      <div className="w-full max-w-sm bg-carbon-800/50 rounded-3xl p-6 border border-gold-500/20">
         <h2 className="text-xl font-bold text-white text-center mb-6">
           {isForgotPassword ? 'Reset Password' : isSignUp ? 'Create Account' : 'Welcome Back'}
         </h2>
@@ -175,7 +175,7 @@ const Login = ({ onSuccess }) => {
                 value={formData.name}
                 onChange={handleChange}
                 required={isSignUp}
-                className="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full bg-carbon-900/50 border border-carbon-700 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent"
               />
             </div>
           )}
@@ -189,7 +189,7 @@ const Login = ({ onSuccess }) => {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full bg-carbon-900/50 border border-carbon-700 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent"
             />
           </div>
 
@@ -204,7 +204,7 @@ const Login = ({ onSuccess }) => {
                 onChange={handleChange}
                 required
                 minLength={6}
-                className="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-3 pl-12 pr-12 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full bg-carbon-900/50 border border-carbon-700 rounded-xl py-3 pl-12 pr-12 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent"
               />
               <button
                 type="button"
@@ -221,7 +221,7 @@ const Login = ({ onSuccess }) => {
               <button
                 type="button"
                 onClick={() => setIsForgotPassword(true)}
-                className="text-orange-400 text-sm hover:underline"
+                className="text-gold-400 text-sm hover:underline"
               >
                 Forgot password?
               </button>
@@ -231,7 +231,7 @@ const Login = ({ onSuccess }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-3 rounded-xl hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="w-full bg-gold-gradient text-carbon-900 font-bold py-3 rounded-xl hover:scale-[1.02] transition-transform shadow-gold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -266,16 +266,16 @@ const Login = ({ onSuccess }) => {
         {!isForgotPassword && (
           <>
             <div className="flex items-center gap-4 my-6">
-              <div className="flex-1 h-px bg-slate-700" />
+              <div className="flex-1 h-px bg-carbon-700" />
               <span className="text-gray-500 text-sm">or</span>
-              <div className="flex-1 h-px bg-slate-700" />
+              <div className="flex-1 h-px bg-carbon-700" />
             </div>
 
             <button
               type="button"
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full bg-slate-900/50 border border-slate-700 text-white font-semibold py-3 rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center gap-3 disabled:opacity-50"
+              className="w-full bg-carbon-900/50 border border-carbon-700 text-white font-semibold py-3 rounded-xl hover:bg-carbon-800 transition-colors flex items-center justify-center gap-3 disabled:opacity-50"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -305,7 +305,7 @@ const Login = ({ onSuccess }) => {
             <button
               type="button"
               onClick={() => setIsForgotPassword(false)}
-              className="text-orange-400 text-sm hover:underline"
+              className="text-gold-400 text-sm hover:underline"
             >
               Back to sign in
             </button>
@@ -315,7 +315,7 @@ const Login = ({ onSuccess }) => {
               <button
                 type="button"
                 onClick={() => setIsSignUp(!isSignUp)}
-                className="text-orange-400 font-semibold hover:underline"
+                className="text-gold-400 font-semibold hover:underline"
               >
                 {isSignUp ? 'Sign In' : 'Sign Up'}
               </button>

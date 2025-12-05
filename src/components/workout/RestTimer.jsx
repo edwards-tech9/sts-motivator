@@ -30,7 +30,7 @@ const RestTimer = ({ duration, onComplete, onSkip }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col items-center justify-center z-40"
+      className="fixed inset-0 bg-gradient-to-b from-carbon-900 to-slate-950 flex flex-col items-center justify-center z-40"
       role="dialog"
       aria-label="Rest timer"
     >
@@ -69,21 +69,21 @@ const RestTimer = ({ duration, onComplete, onSkip }) => {
       <div className="flex gap-4 mb-12" role="group" aria-label="Timer controls">
         <button
           onClick={() => adjustTime(-15)}
-          className="bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400"
+          className="bg-carbon-800 hover:bg-carbon-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gold-400"
           aria-label="Subtract 15 seconds"
         >
           -15s
         </button>
         <button
           onClick={() => setIsPaused(!isPaused)}
-          className="bg-slate-800 hover:bg-slate-700 text-white p-3 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400"
+          className="bg-carbon-800 hover:bg-carbon-700 text-white p-3 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-gold-400"
           aria-label={isPaused ? 'Resume timer' : 'Pause timer'}
         >
           {isPaused ? <Play size={24} /> : <Pause size={24} />}
         </button>
         <button
           onClick={() => adjustTime(15)}
-          className="bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400"
+          className="bg-carbon-800 hover:bg-carbon-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gold-400"
           aria-label="Add 15 seconds"
         >
           +15s
@@ -92,7 +92,7 @@ const RestTimer = ({ duration, onComplete, onSkip }) => {
 
       <button
         onClick={onSkip}
-        className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-4 px-16 rounded-full text-lg hover:scale-105 transition-transform shadow-lg shadow-orange-500/30 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+        className="bg-gold-gradient text-carbon-900 font-bold py-4 px-16 rounded-full text-lg hover:scale-105 transition-transform shadow-lg shadow-gold-500/30 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-offset-2 focus:ring-offset-carbon-900"
       >
         SKIP REST
       </button>

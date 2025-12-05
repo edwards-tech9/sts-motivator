@@ -1,11 +1,11 @@
 import { Flame } from 'lucide-react';
 
 const StreakDisplay = ({ streak, weeklyTarget, weeklyCompleted }) => (
-  <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-2xl p-5 mb-6">
+  <div className="bg-gradient-to-r from-gold-500/20 to-gold-300/20 border border-gold-500/30 rounded-2xl p-5 mb-6">
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div
-          className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center"
+          className="w-14 h-14 bg-gradient-to-br from-gold-500 to-gold-300 rounded-full flex items-center justify-center"
           aria-hidden="true"
         >
           <Flame className="text-white" size={28} />
@@ -26,7 +26,7 @@ const StreakDisplay = ({ streak, weeklyTarget, weeklyCompleted }) => (
           {Array.from({ length: weeklyTarget }, (_, i) => (
             <div
               key={i}
-              className={`w-3 h-3 rounded-full ${i < weeklyCompleted ? 'bg-orange-500' : 'bg-slate-700'}`}
+              className={`w-3 h-3 rounded-full ${i < weeklyCompleted ? 'bg-gold-500' : 'bg-carbon-700'}`}
               aria-hidden="true"
             />
           ))}

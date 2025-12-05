@@ -13,17 +13,17 @@ import Login from './pages/Login';
 
 // Loading spinner component
 const LoadingScreen = () => (
-  <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black flex items-center justify-center">
+  <div className="min-h-screen bg-gradient-to-b from-carbon-900 via-carbon-950 to-black flex items-center justify-center">
     <div className="text-center">
-      <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
+      <div className="w-16 h-16 bg-gradient-to-br from-gold-500 to-gold-300 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
         <span className="text-white text-xl font-black" style={{ fontFamily: 'Oswald, sans-serif' }}>
           STS
         </span>
       </div>
       <div className="flex items-center justify-center gap-2">
-        <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-        <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-        <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+        <div className="w-2 h-2 bg-gold-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+        <div className="w-2 h-2 bg-gold-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+        <div className="w-2 h-2 bg-gold-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
       </div>
     </div>
   </div>
@@ -122,7 +122,7 @@ const AppContent = () => {
         <div className="fixed top-4 right-4 z-[100]">
           <button
             onClick={handleRoleSwitch}
-            className="bg-slate-800/90 backdrop-blur-lg px-4 py-2 rounded-full text-sm font-semibold border border-slate-700 hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400"
+            className="bg-carbon-800/90 backdrop-blur-lg px-4 py-2 rounded-full text-sm font-semibold border border-carbon-700 hover:bg-carbon-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gold-400"
             aria-label={`Switch to ${userRole === 'athlete' ? 'coach' : 'athlete'} view`}
           >
             {userRole === 'athlete' ? '👤 Coach View' : '🏋️ Athlete View'}

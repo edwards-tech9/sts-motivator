@@ -20,7 +20,7 @@ const PRCelebration = ({ show, exercise, newPR, previousPR, onClose }) => {
         >
           NEW PR!
         </h2>
-        <p id="pr-description" className="text-2xl text-orange-400 font-semibold mb-6">{exercise}</p>
+        <p id="pr-description" className="text-2xl text-gold-400 font-semibold mb-6">{exercise}</p>
         <p className="text-7xl font-black text-white mb-4" style={{ fontFamily: 'Oswald, sans-serif' }}>
           {newPR} <span className="text-3xl text-gray-400">lbs</span>
         </p>
@@ -29,7 +29,7 @@ const PRCelebration = ({ show, exercise, newPR, previousPR, onClose }) => {
         </p>
         <button
           onClick={onClose}
-          className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-4 px-12 rounded-full text-lg hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-black"
+          className="bg-gold-gradient text-carbon-900 font-bold py-4 px-12 rounded-full text-lg hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-offset-2 focus:ring-offset-black"
           autoFocus
         >
           KEEP CRUSHING IT

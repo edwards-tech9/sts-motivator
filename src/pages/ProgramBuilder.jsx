@@ -131,16 +131,16 @@ const ProgramBuilder = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black pb-24">
-      <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-lg border-b border-slate-800">
+    <div className="min-h-screen bg-gradient-to-b from-carbon-900 via-carbon-950 to-black pb-24">
+      <header className="sticky top-0 z-30 bg-carbon-900/90 backdrop-blur-lg border-b border-slate-800">
         <div className="flex items-center justify-between p-4">
           <div>
-            <p className="text-orange-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
+            <p className="text-gold-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
             <p className="text-gray-400 text-xs">PROGRAM BUILDER</p>
           </div>
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-xl font-semibold"
+            className="flex items-center gap-2 bg-gold-gradient text-carbon-900 px-4 py-2 rounded-xl font-semibold"
           >
             <Save size={18} />
             Save
@@ -150,13 +150,13 @@ const ProgramBuilder = () => {
 
       <div className="p-6">
         {/* Program Details */}
-        <div className="bg-slate-800/50 rounded-2xl p-5 mb-6">
+        <div className="bg-carbon-800/50 rounded-2xl p-5 mb-6">
           <label className="block text-gray-400 text-sm mb-2">Program Name</label>
           <input
             type="text"
             value={programName}
             onChange={(e) => setProgramName(e.target.value)}
-            className="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-3 px-4 text-white text-xl font-bold focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full bg-carbon-900/50 border border-carbon-700 rounded-xl py-3 px-4 text-white text-xl font-bold focus:outline-none focus:ring-2 focus:ring-gold-500"
             style={{ fontFamily: 'Oswald, sans-serif' }}
           />
 
@@ -165,14 +165,14 @@ const ProgramBuilder = () => {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setWeeks(Math.max(1, weeks - 1))}
-                className="p-2 bg-slate-700 rounded-lg hover:bg-slate-600"
+                className="p-2 bg-carbon-700 rounded-lg hover:bg-slate-600"
               >
                 <Minus size={20} className="text-white" />
               </button>
               <span className="text-2xl font-bold text-white w-12 text-center">{weeks}</span>
               <button
                 onClick={() => setWeeks(Math.min(12, weeks + 1))}
-                className="p-2 bg-slate-700 rounded-lg hover:bg-slate-600"
+                className="p-2 bg-carbon-700 rounded-lg hover:bg-slate-600"
               >
                 <Plus size={20} className="text-white" />
               </button>
@@ -185,7 +185,7 @@ const ProgramBuilder = () => {
           <h2 className="text-white font-bold">Training Days</h2>
           <button
             onClick={addDay}
-            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 rounded-xl text-sm"
+            className="flex items-center gap-2 bg-carbon-800 hover:bg-carbon-700 text-white px-3 py-2 rounded-xl text-sm"
           >
             <Plus size={16} />
             Add Day
@@ -194,10 +194,10 @@ const ProgramBuilder = () => {
 
         <div className="space-y-4">
           {days.map((day, dayIndex) => (
-            <div key={day.id} className="bg-slate-800/50 rounded-2xl overflow-hidden">
+            <div key={day.id} className="bg-carbon-800/50 rounded-2xl overflow-hidden">
               {/* Day Header */}
               <div
-                className="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-800/70"
+                className="flex items-center justify-between p-4 cursor-pointer hover:bg-carbon-800/70"
                 onClick={() => setExpandedDay(expandedDay === dayIndex ? -1 : dayIndex)}
               >
                 <div className="flex items-center gap-3">
@@ -207,7 +207,7 @@ const ProgramBuilder = () => {
                     value={day.name}
                     onChange={(e) => updateDayName(dayIndex, e.target.value)}
                     onClick={(e) => e.stopPropagation()}
-                    className="bg-transparent text-white font-semibold focus:outline-none focus:border-b-2 focus:border-orange-500"
+                    className="bg-transparent text-white font-semibold focus:outline-none focus:border-b-2 focus:border-gold-500"
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -217,7 +217,7 @@ const ProgramBuilder = () => {
                       e.stopPropagation();
                       duplicateDay(dayIndex);
                     }}
-                    className="p-2 hover:bg-slate-700 rounded-lg"
+                    className="p-2 hover:bg-carbon-700 rounded-lg"
                     title="Duplicate day"
                   >
                     <Copy size={16} className="text-gray-400" />
@@ -244,7 +244,7 @@ const ProgramBuilder = () => {
               {expandedDay === dayIndex && (
                 <div className="px-4 pb-4 space-y-3">
                   {day.exercises.map((exercise, exerciseIndex) => (
-                    <div key={exercise.id} className="bg-slate-900/50 rounded-xl p-4">
+                    <div key={exercise.id} className="bg-carbon-900/50 rounded-xl p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <span className="text-gray-500 text-sm">{exerciseIndex + 1}.</span>
@@ -267,7 +267,7 @@ const ProgramBuilder = () => {
                             onChange={(e) =>
                               updateExercise(dayIndex, exerciseIndex, 'sets', parseInt(e.target.value) || 0)
                             }
-                            className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2 px-3 text-white text-center focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            className="w-full bg-carbon-800 border border-carbon-700 rounded-lg py-2 px-3 text-white text-center focus:outline-none focus:ring-2 focus:ring-gold-500"
                           />
                         </div>
                         <div>
@@ -276,7 +276,7 @@ const ProgramBuilder = () => {
                             type="text"
                             value={exercise.reps}
                             onChange={(e) => updateExercise(dayIndex, exerciseIndex, 'reps', e.target.value)}
-                            className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2 px-3 text-white text-center focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            className="w-full bg-carbon-800 border border-carbon-700 rounded-lg py-2 px-3 text-white text-center focus:outline-none focus:ring-2 focus:ring-gold-500"
                           />
                         </div>
                         <div>
@@ -285,7 +285,7 @@ const ProgramBuilder = () => {
                             type="text"
                             value={exercise.tempo}
                             onChange={(e) => updateExercise(dayIndex, exerciseIndex, 'tempo', e.target.value)}
-                            className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2 px-3 text-white text-center focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            className="w-full bg-carbon-800 border border-carbon-700 rounded-lg py-2 px-3 text-white text-center focus:outline-none focus:ring-2 focus:ring-gold-500"
                           />
                         </div>
                         <div>
@@ -296,7 +296,7 @@ const ProgramBuilder = () => {
                             onChange={(e) =>
                               updateExercise(dayIndex, exerciseIndex, 'rest', parseInt(e.target.value) || 0)
                             }
-                            className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2 px-3 text-white text-center focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            className="w-full bg-carbon-800 border border-carbon-700 rounded-lg py-2 px-3 text-white text-center focus:outline-none focus:ring-2 focus:ring-gold-500"
                           />
                         </div>
                       </div>
@@ -308,7 +308,7 @@ const ProgramBuilder = () => {
                       setSelectedDayForExercise(dayIndex);
                       setShowExerciseLibrary(true);
                     }}
-                    className="w-full bg-slate-700/50 hover:bg-slate-700 text-gray-300 py-3 rounded-xl flex items-center justify-center gap-2 transition-colors"
+                    className="w-full bg-carbon-700/50 hover:bg-carbon-700 text-gray-300 py-3 rounded-xl flex items-center justify-center gap-2 transition-colors"
                   >
                     <Plus size={18} />
                     Add Exercise
@@ -323,7 +323,7 @@ const ProgramBuilder = () => {
       {/* Exercise Library Modal */}
       {showExerciseLibrary && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-end justify-center">
-          <div className="bg-slate-900 rounded-t-3xl w-full max-w-lg h-[80vh] flex flex-col">
+          <div className="bg-carbon-900 rounded-t-3xl w-full max-w-lg h-[80vh] flex flex-col">
             <div className="p-6 border-b border-slate-800">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-white font-bold text-lg">Exercise Library</h3>
@@ -333,7 +333,7 @@ const ProgramBuilder = () => {
                     setSelectedDayForExercise(null);
                     setSearchTerm('');
                   }}
-                  className="p-2 hover:bg-slate-800 rounded-lg"
+                  className="p-2 hover:bg-carbon-800 rounded-lg"
                 >
                   <X size={20} className="text-gray-400" />
                 </button>
@@ -346,7 +346,7 @@ const ProgramBuilder = () => {
                   placeholder="Search exercises..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full bg-carbon-800 border border-carbon-700 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-gold-500"
                 />
               </div>
             </div>
@@ -356,7 +356,7 @@ const ProgramBuilder = () => {
                 <button
                   key={exercise.id}
                   onClick={() => addExerciseToDay(selectedDayForExercise, exercise)}
-                  className="w-full bg-slate-800/50 hover:bg-slate-800 rounded-xl p-4 text-left transition-colors"
+                  className="w-full bg-carbon-800/50 hover:bg-carbon-800 rounded-xl p-4 text-left transition-colors"
                 >
                   <p className="text-white font-medium">{exercise.name}</p>
                   <p className="text-gray-400 text-sm">

@@ -92,10 +92,10 @@ const Settings = ({ userRole, onLogout }) => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black dark:from-slate-900 dark:via-slate-950 dark:to-black light:from-gray-50 light:via-gray-100 light:to-gray-200 pb-24">
-        <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-lg border-b border-slate-800">
+      <div className="min-h-screen bg-gradient-to-b from-carbon-900 via-carbon-950 to-black dark:from-carbon-900 dark:via-carbon-950 dark:to-black light:from-gray-50 light:via-gray-100 light:to-gray-200 pb-24">
+        <header className="sticky top-0 z-30 bg-carbon-900/90 backdrop-blur-lg border-b border-slate-800">
           <div className="p-4">
-            <p className="text-orange-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
+            <p className="text-gold-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
             <h1 className="text-white text-xl font-bold">Settings</h1>
           </div>
         </header>
@@ -105,15 +105,15 @@ const Settings = ({ userRole, onLogout }) => {
             <SlideIn key={group.title} delay={groupIndex * 50}>
               <div>
                 <h2 className="text-gray-400 text-sm uppercase tracking-wide mb-3">{group.title}</h2>
-                <div className="bg-slate-800/50 rounded-2xl overflow-hidden">
+                <div className="bg-carbon-800/50 rounded-2xl overflow-hidden">
               {group.items.map((item, index) => {
                 const Icon = item.icon;
                 return (
                   <button
                     key={item.label}
                     onClick={item.action}
-                    className={`w-full flex items-center justify-between p-4 hover:bg-slate-700/50 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-inset ${
-                      index < group.items.length - 1 ? 'border-b border-slate-700/50' : ''
+                    className={`w-full flex items-center justify-between p-4 hover:bg-carbon-700/50 transition-colors focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-inset ${
+                      index < group.items.length - 1 ? 'border-b border-carbon-700/50' : ''
                     }`}
                     aria-label={item.type === 'toggle' ? `Toggle ${item.label}` : item.label}
                   >
@@ -128,7 +128,7 @@ const Settings = ({ userRole, onLogout }) => {
                       {item.type === 'toggle' ? (
                         <div
                           className={`w-12 h-7 rounded-full p-1 transition-colors ${
-                            isDark ? 'bg-orange-500' : 'bg-slate-600'
+                            isDark ? 'bg-gold-500' : 'bg-slate-600'
                           }`}
                           role="switch"
                           aria-checked={isDark}

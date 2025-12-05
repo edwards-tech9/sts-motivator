@@ -92,10 +92,10 @@ const WorkoutHistory = () => {
   const avgDuration = thisMonthWorkouts.length > 0 ? Math.round(thisMonthWorkouts.reduce((acc, w) => acc + w.duration, 0) / thisMonthWorkouts.length) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black pb-24">
-      <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-lg border-b border-slate-800">
+    <div className="min-h-screen bg-gradient-to-b from-carbon-900 via-carbon-950 to-black pb-24">
+      <header className="sticky top-0 z-30 bg-carbon-900/90 backdrop-blur-lg border-b border-slate-800">
         <div className="p-4">
-          <p className="text-orange-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
+          <p className="text-gold-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
           <h1 className="text-white text-xl font-bold">Workout History</h1>
         </div>
       </header>
@@ -103,21 +103,21 @@ const WorkoutHistory = () => {
       <div className="p-6">
         {/* Monthly Stats */}
         <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-slate-800/50 rounded-2xl p-4 text-center">
-            <Dumbbell className="text-orange-400 mx-auto mb-2" size={24} />
+          <div className="bg-carbon-800/50 rounded-2xl p-4 text-center">
+            <Dumbbell className="text-gold-400 mx-auto mb-2" size={24} />
             <p className="text-2xl font-black text-white" style={{ fontFamily: 'Oswald, sans-serif' }}>
               {thisMonthWorkouts.length}
             </p>
             <p className="text-gray-400 text-xs">Workouts</p>
           </div>
-          <div className="bg-slate-800/50 rounded-2xl p-4 text-center">
+          <div className="bg-carbon-800/50 rounded-2xl p-4 text-center">
             <TrendingUp className="text-green-400 mx-auto mb-2" size={24} />
             <p className="text-2xl font-black text-white" style={{ fontFamily: 'Oswald, sans-serif' }}>
               {(totalVolume / 1000).toFixed(1)}k
             </p>
             <p className="text-gray-400 text-xs">Total lbs</p>
           </div>
-          <div className="bg-slate-800/50 rounded-2xl p-4 text-center">
+          <div className="bg-carbon-800/50 rounded-2xl p-4 text-center">
             <Trophy className="text-yellow-400 mx-auto mb-2" size={24} />
             <p className="text-2xl font-black text-white" style={{ fontFamily: 'Oswald, sans-serif' }}>
               {totalPRs}
@@ -127,11 +127,11 @@ const WorkoutHistory = () => {
         </div>
 
         {/* Calendar Header */}
-        <div className="bg-slate-800/50 rounded-2xl p-4 mb-6">
+        <div className="bg-carbon-800/50 rounded-2xl p-4 mb-6">
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={() => navigateMonth(-1)}
-              className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-carbon-700 rounded-lg transition-colors"
               aria-label="Previous month"
             >
               <ChevronLeft size={20} className="text-gray-400" />
@@ -141,7 +141,7 @@ const WorkoutHistory = () => {
             </h2>
             <button
               onClick={() => navigateMonth(1)}
-              className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-carbon-700 rounded-lg transition-colors"
               aria-label="Next month"
             >
               <ChevronRight size={20} className="text-gray-400" />
@@ -179,10 +179,10 @@ const WorkoutHistory = () => {
                   onClick={() => workout && setSelectedWorkout(workout)}
                   className={`aspect-square rounded-lg flex flex-col items-center justify-center text-sm transition-all ${
                     workout
-                      ? 'bg-gradient-to-br from-orange-500/30 to-red-500/30 border border-orange-500/50 hover:scale-105 cursor-pointer'
+                      ? 'bg-gradient-to-br from-gold-500/30 to-gold-300/30 border border-gold-500/50 hover:scale-105 cursor-pointer'
                       : isToday
-                      ? 'bg-slate-700 border border-slate-600'
-                      : 'hover:bg-slate-700/50'
+                      ? 'bg-carbon-700 border border-carbon-600'
+                      : 'hover:bg-carbon-700/50'
                   }`}
                 >
                   <span className={workout ? 'text-white font-semibold' : 'text-gray-400'}>{day}</span>
@@ -202,7 +202,7 @@ const WorkoutHistory = () => {
             <button
               key={workout.id}
               onClick={() => setSelectedWorkout(workout)}
-              className="w-full bg-slate-800/50 rounded-2xl p-4 text-left hover:bg-slate-800 transition-colors"
+              className="w-full bg-carbon-800/50 rounded-2xl p-4 text-left hover:bg-carbon-800 transition-colors"
             >
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-white font-semibold">{workout.name}</h4>
@@ -226,9 +226,9 @@ const WorkoutHistory = () => {
                   {workout.completedSets}/{workout.totalSets} sets
                 </span>
               </div>
-              <div className="mt-2 h-2 bg-slate-900 rounded-full overflow-hidden">
+              <div className="mt-2 h-2 bg-carbon-900 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full"
+                  className="h-full bg-gradient-to-r from-gold-500 to-gold-300 rounded-full"
                   style={{ width: `${(workout.completedSets / workout.totalSets) * 100}%` }}
                 />
               </div>
@@ -244,10 +244,10 @@ const WorkoutHistory = () => {
           onClick={() => setSelectedWorkout(null)}
         >
           <div
-            className="bg-slate-900 rounded-t-3xl w-full max-w-lg p-6 animate-slide-up"
+            className="bg-carbon-900 rounded-t-3xl w-full max-w-lg p-6 animate-slide-up"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-6" />
+            <div className="w-12 h-1 bg-carbon-700 rounded-full mx-auto mb-6" />
 
             <h2 className="text-2xl font-black text-white mb-2" style={{ fontFamily: 'Oswald, sans-serif' }}>
               {selectedWorkout.name.toUpperCase()}
@@ -262,19 +262,19 @@ const WorkoutHistory = () => {
             </p>
 
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-slate-800/50 rounded-xl p-4">
+              <div className="bg-carbon-800/50 rounded-xl p-4">
                 <p className="text-gray-400 text-sm">Duration</p>
                 <p className="text-2xl font-bold text-white">{selectedWorkout.duration} min</p>
               </div>
-              <div className="bg-slate-800/50 rounded-xl p-4">
+              <div className="bg-carbon-800/50 rounded-xl p-4">
                 <p className="text-gray-400 text-sm">Volume</p>
                 <p className="text-2xl font-bold text-white">{selectedWorkout.volume.toLocaleString()} lbs</p>
               </div>
-              <div className="bg-slate-800/50 rounded-xl p-4">
+              <div className="bg-carbon-800/50 rounded-xl p-4">
                 <p className="text-gray-400 text-sm">Exercises</p>
                 <p className="text-2xl font-bold text-white">{selectedWorkout.exercises}</p>
               </div>
-              <div className="bg-slate-800/50 rounded-xl p-4">
+              <div className="bg-carbon-800/50 rounded-xl p-4">
                 <p className="text-gray-400 text-sm">Sets Completed</p>
                 <p className="text-2xl font-bold text-white">
                   {selectedWorkout.completedSets}/{selectedWorkout.totalSets}
@@ -293,7 +293,7 @@ const WorkoutHistory = () => {
 
             <button
               onClick={() => setSelectedWorkout(null)}
-              className="w-full bg-slate-800 text-white font-semibold py-3 rounded-xl hover:bg-slate-700 transition-colors"
+              className="w-full bg-carbon-800 text-white font-semibold py-3 rounded-xl hover:bg-carbon-700 transition-colors"
             >
               Close
             </button>

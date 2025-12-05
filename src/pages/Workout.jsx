@@ -111,22 +111,22 @@ const Workout = ({ techMode, onToggleTechMode, onExit }) => {
   const progress = (completedTotal / totalSets) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black pb-24">
-      <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-lg border-b border-slate-800">
+    <div className="min-h-screen bg-gradient-to-b from-carbon-900 via-carbon-950 to-black pb-24">
+      <header className="sticky top-0 z-30 bg-carbon-900/90 backdrop-blur-lg border-b border-slate-800">
         <div className="flex items-center justify-between p-4">
           <button
             onClick={onExit}
-            className="flex items-center gap-2 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-400 rounded-lg"
+            className="flex items-center gap-2 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-gold-400 rounded-lg"
             aria-label="Exit workout"
           >
             <ChevronLeft size={20} />
             <span className="text-sm">Exit</span>
           </button>
-          <p className="text-orange-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
+          <p className="text-gold-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
           <button
             onClick={onToggleTechMode}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-orange-400 ${
-              techMode ? 'bg-orange-500 text-white' : 'bg-slate-700 text-gray-400'
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-gold-400 ${
+              techMode ? 'bg-gold-500 text-white' : 'bg-carbon-700 text-gray-400'
             }`}
             aria-pressed={techMode}
             aria-label={techMode ? 'Switch to simple mode' : 'Switch to tech mode'}
@@ -152,10 +152,10 @@ const Workout = ({ techMode, onToggleTechMode, onExit }) => {
             <span className="text-gray-400">
               {completedTotal} of {totalSets} sets complete
             </span>
-            <span className="text-orange-400 font-semibold">{Math.round(progress)}%</span>
+            <span className="text-gold-400 font-semibold">{Math.round(progress)}%</span>
           </div>
           <div
-            className="h-2 bg-slate-800 rounded-full overflow-hidden"
+            className="h-2 bg-carbon-800 rounded-full overflow-hidden"
             role="progressbar"
             aria-valuenow={Math.round(progress)}
             aria-valuemin={0}
@@ -163,7 +163,7 @@ const Workout = ({ techMode, onToggleTechMode, onExit }) => {
             aria-label="Workout progress"
           >
             <div
-              className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full transition-all duration-500"
+              className="h-full bg-gradient-to-r from-gold-500 to-gold-300 rounded-full transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -187,7 +187,7 @@ const Workout = ({ techMode, onToggleTechMode, onExit }) => {
           />
         ))}
 
-        <div className="bg-slate-800/30 rounded-2xl p-5 border border-slate-700/50">
+        <div className="bg-carbon-800/30 rounded-2xl p-5 border border-carbon-700/50">
           <h3 className="text-gray-400 text-sm uppercase tracking-wide mb-3">Finisher / Accessory</h3>
           <p className="text-gray-300">Assisted hip airplanes 2×10, rolling plank 2×20</p>
         </div>

@@ -10,7 +10,7 @@ const Confetti = ({ active }) => {
         x: Math.random() * 100,
         delay: Math.random() * 0.5,
         duration: 1 + Math.random() * 2,
-        color: ['#FFD700', '#FF6B35', '#00D4AA', '#FF3366', '#7C4DFF'][Math.floor(Math.random() * 5)],
+        color: ['#D4AF37', '#F0D775', '#B8962E', '#FFFFFF', '#C9A227'][Math.floor(Math.random() * 5)],
         size: 6 + Math.random() * 8,
       }));
       setParticles(newParticles);

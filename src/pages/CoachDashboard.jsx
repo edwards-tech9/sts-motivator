@@ -25,12 +25,12 @@ const ClientDetailView = ({ client, onBack }) => {
   const [activeTab, setActiveTab] = useState('overview');
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black pb-24">
-      <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-lg border-b border-slate-800">
+    <div className="min-h-screen bg-gradient-to-b from-carbon-900 via-carbon-950 to-black pb-24">
+      <header className="sticky top-0 z-30 bg-carbon-900/90 backdrop-blur-lg border-b border-slate-800">
         <div className="flex items-center justify-between p-4">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 rounded-lg"
+            className="flex items-center gap-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-gold-400 rounded-lg"
             aria-label="Go back to client list"
           >
             <ChevronLeft size={24} />
@@ -38,13 +38,13 @@ const ClientDetailView = ({ client, onBack }) => {
           </button>
           <div className="flex gap-2">
             <button
-              className="p-2 bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="p-2 bg-carbon-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-400"
               aria-label="Message client"
             >
               <MessageSquare size={20} className="text-gray-400" />
             </button>
             <button
-              className="p-2 bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="p-2 bg-carbon-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-400"
               aria-label="More options"
             >
               <Menu size={20} className="text-gray-400" />
@@ -55,7 +55,7 @@ const ClientDetailView = ({ client, onBack }) => {
 
       <div className="p-6">
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
+          <div className="w-20 h-20 bg-gradient-to-br from-gold-500 to-gold-300 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
             {client.avatar}
           </div>
           <div>
@@ -71,24 +71,24 @@ const ClientDetailView = ({ client, onBack }) => {
         </div>
 
         <div className="grid grid-cols-4 gap-3 mb-6">
-          <div className="bg-slate-800/50 rounded-xl p-3 text-center">
+          <div className="bg-carbon-800/50 rounded-xl p-3 text-center">
             <p className="text-2xl font-black text-white" style={{ fontFamily: 'Oswald, sans-serif' }}>
               {client.thirtyDay}%
             </p>
             <p className="text-gray-500 text-xs">30-Day</p>
           </div>
-          <div className="bg-slate-800/50 rounded-xl p-3 text-center">
+          <div className="bg-carbon-800/50 rounded-xl p-3 text-center">
             <p className="text-2xl font-black text-white" style={{ fontFamily: 'Oswald, sans-serif' }}>W3</p>
             <p className="text-gray-500 text-xs">Current</p>
           </div>
-          <div className="bg-slate-800/50 rounded-xl p-3 text-center">
+          <div className="bg-carbon-800/50 rounded-xl p-3 text-center">
             <p className="text-2xl font-black text-green-400" style={{ fontFamily: 'Oswald, sans-serif' }}>
               {client.gained}
             </p>
             <p className="text-gray-500 text-xs">Progress</p>
           </div>
-          <div className="bg-slate-800/50 rounded-xl p-3 text-center">
-            <p className="text-2xl font-black text-orange-400" style={{ fontFamily: 'Oswald, sans-serif' }}>
+          <div className="bg-carbon-800/50 rounded-xl p-3 text-center">
+            <p className="text-2xl font-black text-gold-400" style={{ fontFamily: 'Oswald, sans-serif' }}>
               {client.prs}
             </p>
             <p className="text-gray-500 text-xs">PRs</p>
@@ -102,10 +102,10 @@ const ClientDetailView = ({ client, onBack }) => {
               onClick={() => setActiveTab(tab.toLowerCase())}
               role="tab"
               aria-selected={activeTab === tab.toLowerCase()}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all focus:outline-none focus:ring-2 focus:ring-orange-400 ${
+              className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all focus:outline-none focus:ring-2 focus:ring-gold-400 ${
                 activeTab === tab.toLowerCase()
-                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
-                  : 'bg-slate-800 text-gray-400'
+                  ? 'bg-gold-gradient text-carbon-900'
+                  : 'bg-carbon-800 text-gray-400'
               }`}
             >
               {tab}
@@ -113,7 +113,7 @@ const ClientDetailView = ({ client, onBack }) => {
           ))}
         </div>
 
-        <div className="bg-slate-800/50 rounded-2xl p-5 mb-6">
+        <div className="bg-carbon-800/50 rounded-2xl p-5 mb-6">
           <h3 className="text-white font-bold mb-4">CURRENT PROGRAM: 4-Week Strength Block</h3>
           <div className="space-y-3">
             {[
@@ -124,15 +124,15 @@ const ClientDetailView = ({ client, onBack }) => {
             ].map((week) => (
               <div key={week.week} className="flex items-center gap-4">
                 <span className="text-gray-400 w-16">Week {week.week}</span>
-                <div className="flex-1 h-3 bg-slate-900 rounded-full overflow-hidden">
+                <div className="flex-1 h-3 bg-carbon-900 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full ${
-                      week.current ? 'bg-gradient-to-r from-orange-500 to-red-500' : 'bg-green-500'
+                      week.current ? 'bg-gradient-to-r from-gold-500 to-gold-300' : 'bg-green-500'
                     }`}
                     style={{ width: `${week.progress}%` }}
                   />
                 </div>
-                <span className={`text-sm ${week.current ? 'text-orange-400' : 'text-gray-400'}`}>
+                <span className={`text-sm ${week.current ? 'text-gold-400' : 'text-gray-400'}`}>
                   {week.completed}/{week.total}
                   {week.current && ' ←'}
                 </span>
@@ -141,7 +141,7 @@ const ClientDetailView = ({ client, onBack }) => {
           </div>
         </div>
 
-        <div className="bg-slate-800/50 rounded-2xl p-5 mb-6">
+        <div className="bg-carbon-800/50 rounded-2xl p-5 mb-6">
           <h3 className="text-white font-bold mb-4">STRENGTH PROGRESS (Est. 1RM)</h3>
           <div className="space-y-4">
             {[
@@ -157,9 +157,9 @@ const ClientDetailView = ({ client, onBack }) => {
                     <span className="text-green-400">(+{lift.change}%)</span>
                   </span>
                 </div>
-                <div className="h-2 bg-slate-900 rounded-full overflow-hidden">
+                <div className="h-2 bg-carbon-900 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full"
+                    className="h-full bg-gradient-to-r from-gold-500 to-gold-300 rounded-full"
                     style={{ width: `${(lift.to / 400) * 100}%` }}
                   />
                 </div>
@@ -168,7 +168,7 @@ const ClientDetailView = ({ client, onBack }) => {
           </div>
         </div>
 
-        <button className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-4 rounded-2xl text-lg hover:scale-[1.02] transition-transform shadow-lg shadow-orange-500/30 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-slate-900">
+        <button className="w-full bg-gold-gradient text-carbon-900 font-bold py-4 rounded-2xl text-lg hover:scale-[1.02] transition-transform shadow-lg shadow-gold-500/30 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-offset-2 focus:ring-offset-carbon-900">
           Assign New Program
         </button>
       </div>
@@ -215,16 +215,16 @@ const CoachDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black pb-24">
-      <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-lg border-b border-slate-800">
+    <div className="min-h-screen bg-gradient-to-b from-carbon-900 via-carbon-950 to-black pb-24">
+      <header className="sticky top-0 z-30 bg-carbon-900/90 backdrop-blur-lg border-b border-slate-800">
         <div className="flex items-center justify-between p-4">
           <div>
-            <p className="text-orange-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
+            <p className="text-gold-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
             <p className="text-gray-400 text-xs">COACH DASHBOARD</p>
           </div>
           <div className="flex items-center gap-3">
             <button
-              className="relative p-2 bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="relative p-2 bg-carbon-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-400"
               aria-label="Notifications, 3 unread"
             >
               <Bell size={20} className="text-gray-400" />
@@ -232,7 +232,7 @@ const CoachDashboard = () => {
                 3
               </span>
             </button>
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold">
+            <div className="w-10 h-10 bg-gradient-to-br from-gold-500 to-gold-300 rounded-full flex items-center justify-center text-white font-bold">
               MS
             </div>
           </div>
@@ -246,21 +246,21 @@ const CoachDashboard = () => {
         </div>
 
         <div className="grid grid-cols-3 gap-3 mb-8">
-          <div className="bg-slate-800/50 rounded-2xl p-4 text-center">
+          <div className="bg-carbon-800/50 rounded-2xl p-4 text-center">
             <BarChart3 className="text-blue-400 mx-auto mb-2" size={28} aria-hidden="true" />
             <p className="text-3xl font-black text-white" style={{ fontFamily: 'Oswald, sans-serif' }}>
               18/24
             </p>
             <p className="text-gray-400 text-xs">Workouts Done</p>
           </div>
-          <div className="bg-slate-800/50 rounded-2xl p-4 text-center">
+          <div className="bg-carbon-800/50 rounded-2xl p-4 text-center">
             <Video className="text-purple-400 mx-auto mb-2" size={28} aria-hidden="true" />
             <p className="text-3xl font-black text-white" style={{ fontFamily: 'Oswald, sans-serif' }}>
               5
             </p>
             <p className="text-gray-400 text-xs">Form Checks</p>
           </div>
-          <div className="bg-slate-800/50 rounded-2xl p-4 text-center">
+          <div className="bg-carbon-800/50 rounded-2xl p-4 text-center">
             <AlertTriangle className="text-yellow-400 mx-auto mb-2" size={28} aria-hidden="true" />
             <p className="text-3xl font-black text-white" style={{ fontFamily: 'Oswald, sans-serif' }}>
               3
@@ -278,7 +278,7 @@ const CoachDashboard = () => {
             <ChevronRight className="text-gray-500" size={20} aria-hidden="true" />
           </div>
           <div className="space-y-3">
-            <div className="flex items-center justify-between bg-slate-900/50 rounded-xl p-3">
+            <div className="flex items-center justify-between bg-carbon-900/50 rounded-xl p-3">
               <div className="flex items-center gap-3">
                 <span className="text-red-400" aria-hidden="true">🔴</span>
                 <div>
@@ -286,11 +286,11 @@ const CoachDashboard = () => {
                   <p className="text-gray-500 text-sm">No login in 7 days</p>
                 </div>
               </div>
-              <button className="bg-orange-500/20 text-orange-400 px-4 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-orange-400">
+              <button className="bg-gold-500/20 text-gold-400 px-4 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-gold-400">
                 Message
               </button>
             </div>
-            <div className="flex items-center justify-between bg-slate-900/50 rounded-xl p-3">
+            <div className="flex items-center justify-between bg-carbon-900/50 rounded-xl p-3">
               <div className="flex items-center gap-3">
                 <span className="text-yellow-400" aria-hidden="true">🟠</span>
                 <div>
@@ -298,14 +298,14 @@ const CoachDashboard = () => {
                   <p className="text-gray-500 text-sm">Compliance dropped 40%</p>
                 </div>
               </div>
-              <button className="bg-slate-700 text-gray-300 px-4 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-orange-400">
+              <button className="bg-carbon-700 text-gray-300 px-4 py-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-gold-400">
                 View
               </button>
             </div>
           </div>
         </div>
 
-        <div className="bg-slate-800/30 rounded-2xl p-5 mb-6">
+        <div className="bg-carbon-800/30 rounded-2xl p-5 mb-6">
           <h2 className="text-white font-bold mb-4">RECENT ACTIVITY</h2>
           <div className="space-y-3">
             {[
@@ -316,7 +316,7 @@ const CoachDashboard = () => {
             ].map((item, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0"
+                className="flex items-center justify-between py-2 border-b border-carbon-700/50 last:border-0"
               >
                 <div className="flex items-center gap-3">
                   <span className="text-xl" aria-hidden="true">{item.icon}</span>
@@ -333,7 +333,7 @@ const CoachDashboard = () => {
             <h2 className="text-white font-bold">ALL CLIENTS</h2>
             <div className="flex gap-2">
               <button
-                className="p-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="p-2 bg-gradient-to-r from-gold-500 to-gold-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-400"
                 aria-label="Add new client"
               >
                 <Plus size={18} className="text-white" />
@@ -346,7 +346,7 @@ const CoachDashboard = () => {
               <button
                 key={client.id}
                 onClick={() => setSelectedClient(client)}
-                className="w-full bg-slate-800/50 hover:bg-slate-800 rounded-2xl p-4 flex items-center justify-between transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full bg-carbon-800/50 hover:bg-carbon-800 rounded-2xl p-4 flex items-center justify-between transition-colors focus:outline-none focus:ring-2 focus:ring-gold-400"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-slate-600 to-slate-700 rounded-full flex items-center justify-center text-white font-bold">

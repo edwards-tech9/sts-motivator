@@ -241,7 +241,7 @@ export const ModalAnimation = ({ isOpen, children, className = '' }) => {
 export const Skeleton = ({ width, height, className = '', rounded = 'md' }) => {
   return (
     <div
-      className={`animate-pulse bg-slate-700/50 rounded-${rounded} ${className}`}
+      className={`animate-pulse bg-carbon-700/50 rounded-${rounded} ${className}`}
       style={{ width, height }}
     />
   );
@@ -250,7 +250,7 @@ export const Skeleton = ({ width, height, className = '', rounded = 'md' }) => {
 // Card skeleton
 export const CardSkeleton = ({ className = '' }) => {
   return (
-    <div className={`bg-slate-800/50 rounded-xl p-4 space-y-3 ${className}`}>
+    <div className={`bg-carbon-800/50 rounded-xl p-4 space-y-3 ${className}`}>
       <Skeleton height="1.5rem" width="60%" />
       <Skeleton height="1rem" width="80%" />
       <Skeleton height="1rem" width="40%" />
@@ -279,9 +279,9 @@ export const AnimatedProgress = ({ value, max = 100, className = '' }) => {
   }, [value, max]);
 
   return (
-    <div className={`h-2 bg-slate-700 rounded-full overflow-hidden ${className}`}>
+    <div className={`h-2 bg-carbon-700 rounded-full overflow-hidden ${className}`}>
       <div
-        className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full transition-all duration-700 ease-out"
+        className="h-full bg-gradient-to-r from-gold-500 to-gold-300 rounded-full transition-all duration-700 ease-out"
         style={{ width: `${width}%` }}
       />
     </div>
