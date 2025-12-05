@@ -1,8 +1,24 @@
-import { Sun, Moon, Bell, Lock, User, HelpCircle, LogOut, ChevronRight } from 'lucide-react';
+import { Sun, Moon, Bell, Lock, User, HelpCircle, LogOut, ChevronRight, Download, Wifi, WifiOff } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { usePWA } from '../hooks/usePWA';
+import { PageTransition, SlideIn, AnimatedButton } from '../components/ui/AnimatedComponents';
 
 const Settings = ({ userRole, onLogout }) => {
   const { theme, toggleTheme, isDark } = useTheme();
+  const { isInstalled, isInstallable, isOnline, installApp, requestNotificationPermission } = usePWA();
+
+  const handleInstall = async () => {
+    await installApp();
+  };
+
+  const handleNotifications = async () => {
+    const permission = await requestNotificationPermission();
+    if (permission === 'granted') {
+      alert('Notifications enabled!');
+    } else if (permission === 'denied') {
+      alert('Notification permission denied. Enable in browser settings.');
+    }
+  };
 
   const settingGroups = [
     {
@@ -18,12 +34,31 @@ const Settings = ({ userRole, onLogout }) => {
       ],
     },
     {
+      title: 'App',
+      items: [
+        ...(isInstallable && !isInstalled ? [{
+          icon: Download,
+          label: 'Install App',
+          value: 'Add to Home Screen',
+          action: handleInstall,
+          type: 'link',
+        }] : []),
+        {
+          icon: isOnline ? Wifi : WifiOff,
+          label: 'Connection',
+          value: isOnline ? 'Online' : 'Offline',
+          type: 'status',
+        },
+      ],
+    },
+    {
       title: 'Notifications',
       items: [
         {
           icon: Bell,
           label: 'Push Notifications',
-          value: 'Enabled',
+          value: Notification.permission === 'granted' ? 'Enabled' : 'Disabled',
+          action: handleNotifications,
           type: 'link',
         },
       ],
@@ -53,22 +88,24 @@ const Settings = ({ userRole, onLogout }) => {
         },
       ],
     },
-  ];
+  ].filter(group => group.items.length > 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black dark:from-slate-900 dark:via-slate-950 dark:to-black light:from-gray-50 light:via-gray-100 light:to-gray-200 pb-24">
-      <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-lg border-b border-slate-800">
-        <div className="p-4">
-          <p className="text-orange-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
-          <h1 className="text-white text-xl font-bold">Settings</h1>
-        </div>
-      </header>
+    <PageTransition>
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black dark:from-slate-900 dark:via-slate-950 dark:to-black light:from-gray-50 light:via-gray-100 light:to-gray-200 pb-24">
+        <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-lg border-b border-slate-800">
+          <div className="p-4">
+            <p className="text-orange-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
+            <h1 className="text-white text-xl font-bold">Settings</h1>
+          </div>
+        </header>
 
-      <div className="p-6 space-y-6">
-        {settingGroups.map((group) => (
-          <div key={group.title}>
-            <h2 className="text-gray-400 text-sm uppercase tracking-wide mb-3">{group.title}</h2>
-            <div className="bg-slate-800/50 rounded-2xl overflow-hidden">
+        <div className="p-6 space-y-6">
+          {settingGroups.map((group, groupIndex) => (
+            <SlideIn key={group.title} delay={groupIndex * 50}>
+              <div>
+                <h2 className="text-gray-400 text-sm uppercase tracking-wide mb-3">{group.title}</h2>
+                <div className="bg-slate-800/50 rounded-2xl overflow-hidden">
               {group.items.map((item, index) => {
                 const Icon = item.icon;
                 return (
@@ -109,23 +146,27 @@ const Settings = ({ userRole, onLogout }) => {
                   </button>
                 );
               })}
-            </div>
-          </div>
-        ))}
+                </div>
+              </div>
+            </SlideIn>
+          ))}
 
-        <button
-          onClick={onLogout}
-          className="w-full flex items-center justify-center gap-2 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 font-semibold hover:bg-red-500/20 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
-        >
-          <LogOut size={20} aria-hidden="true" />
-          Sign Out
-        </button>
+          <SlideIn delay={settingGroups.length * 50 + 50}>
+            <AnimatedButton
+              onClick={onLogout}
+              className="w-full flex items-center justify-center gap-2 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 font-semibold hover:bg-red-500/20 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
+            >
+              <LogOut size={20} aria-hidden="true" />
+              Sign Out
+            </AnimatedButton>
+          </SlideIn>
 
-        <p className="text-center text-gray-500 text-sm">
-          STS M0TIV8R v1.0.0
-        </p>
+          <p className="text-center text-gray-500 text-sm">
+            STS M0TIV8R v1.1.0
+          </p>
+        </div>
       </div>
-    </div>
+    </PageTransition>
   );
 };
 
