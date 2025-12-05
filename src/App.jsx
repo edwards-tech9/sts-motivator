@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { isFirebaseConfigured } from './services/firebase';
 import BottomNav from './components/layout/BottomNav';
 import AthleteHome from './pages/AthleteHome';
 import Workout from './pages/Workout';
@@ -36,7 +37,7 @@ const AppContent = () => {
   const [techMode, setTechMode] = useState(false);
 
   // Demo mode state (for switching between roles without auth)
-  const [demoMode, setDemoMode] = useState(!import.meta.env.VITE_FIREBASE_API_KEY);
+  const [demoMode, setDemoMode] = useState(!isFirebaseConfigured);
   const [demoRole, setDemoRole] = useState('athlete');
 
   // Show loading screen while checking auth

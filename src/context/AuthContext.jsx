@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { onAuthStateChange, getUserData, logOut } from '../services/auth';
+import { isFirebaseConfigured } from '../services/firebase';
 
 const AuthContext = createContext(null);
 
@@ -18,35 +18,66 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChange(async (firebaseUser) => {
-      setLoading(true);
-      setError(null);
-
-      if (firebaseUser) {
-        setUser(firebaseUser);
-
-        // Fetch additional user data from Firestore
-        const { data, error: fetchError } = await getUserData(firebaseUser.uid);
-        if (data) {
-          setUserData(data);
-        } else if (fetchError) {
-          setError(fetchError);
-        }
-      } else {
-        setUser(null);
-        setUserData(null);
-      }
-
+    // If Firebase is not configured, skip auth setup and go to demo mode
+    if (!isFirebaseConfigured) {
       setLoading(false);
-    });
+      return;
+    }
+
+    // Dynamically import auth services only when Firebase is configured
+    let unsubscribe = () => {};
+
+    const setupAuth = async () => {
+      try {
+        const { onAuthStateChange, getUserData } = await import('../services/auth');
+
+        unsubscribe = onAuthStateChange(async (firebaseUser) => {
+          setLoading(true);
+          setError(null);
+
+          if (firebaseUser) {
+            setUser(firebaseUser);
+
+            // Fetch additional user data from Firestore
+            const { data, error: fetchError } = await getUserData(firebaseUser.uid);
+            if (data) {
+              setUserData(data);
+            } else if (fetchError) {
+              setError(fetchError);
+            }
+          } else {
+            setUser(null);
+            setUserData(null);
+          }
+
+          setLoading(false);
+        });
+      } catch (err) {
+        console.error('Auth setup error:', err);
+        setLoading(false);
+      }
+    };
+
+    setupAuth();
 
     return () => unsubscribe();
   }, []);
 
   const logout = async () => {
-    const { error: logoutError } = await logOut();
-    if (logoutError) {
-      setError(logoutError);
+    if (!isFirebaseConfigured) {
+      setUser(null);
+      setUserData(null);
+      return;
+    }
+
+    try {
+      const { logOut } = await import('../services/auth');
+      const { error: logoutError } = await logOut();
+      if (logoutError) {
+        setError(logoutError);
+      }
+    } catch (err) {
+      setError(err.message);
     }
   };
 

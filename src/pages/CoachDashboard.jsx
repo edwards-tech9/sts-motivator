@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell, ChevronRight, Plus, AlertTriangle, BarChart3, Video, MessageSquare, Menu, ChevronLeft } from 'lucide-react';
+import { getAthletes, getWorkouts } from '../services/localStorage';
 
-// Mock data - will be replaced with Firestore
-const mockClients = [
+// Default clients that show if no athletes in storage
+const defaultClients = [
   { id: 1, name: 'John Davidson', program: 'Strength 4x', sevenDay: 86, thirtyDay: 91, status: 'good', avatar: 'JD', goal: 'Strength', level: 'Intermediate', startDate: 'March 2024', prs: 3, gained: '12 lbs' },
   { id: 2, name: 'Emma Sullivan', program: 'Hypertrophy', sevenDay: 100, thirtyDay: 88, status: 'good', avatar: 'ES', goal: 'Muscle Gain', level: 'Advanced', startDate: 'Jan 2024', prs: 5, gained: '8 lbs' },
   { id: 3, name: 'Sarah Martinez', program: 'Fat Loss', sevenDay: 0, thirtyDay: 45, status: 'alert', avatar: 'SM', goal: 'Fat Loss', level: 'Beginner', startDate: 'Oct 2024', prs: 1, gained: '-15 lbs' },
@@ -178,6 +179,36 @@ const ClientDetailView = ({ client, onBack }) => {
 // Main Coach Dashboard
 const CoachDashboard = () => {
   const [selectedClient, setSelectedClient] = useState(null);
+  const [clients, setClients] = useState(defaultClients);
+  const [recentWorkouts, setRecentWorkouts] = useState([]);
+
+  useEffect(() => {
+    // Load athletes from localStorage
+    const storedAthletes = getAthletes();
+    if (storedAthletes.length > 0) {
+      // Map stored athletes to client format
+      const mappedClients = storedAthletes.map(a => ({
+        id: a.id,
+        name: a.name,
+        program: a.currentProgram || 'No Program',
+        sevenDay: a.weeklyProgress ? Math.round((a.weeklyProgress / a.weeklyTarget) * 100) : 0,
+        thirtyDay: Math.floor(Math.random() * 40) + 60,
+        status: a.status === 'needs_attention' ? 'alert' : a.status === 'active' ? 'good' : 'watch',
+        avatar: a.avatar || a.name.split(' ').map(n => n[0]).join(''),
+        goal: 'General Fitness',
+        level: 'Intermediate',
+        startDate: new Date(a.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+        prs: Math.floor(Math.random() * 5) + 1,
+        gained: `${Math.floor(Math.random() * 15) - 5} lbs`,
+        streak: a.streak || 0,
+      }));
+      setClients(mappedClients);
+    }
+
+    // Load recent workouts
+    const workouts = getWorkouts();
+    setRecentWorkouts(workouts.slice(-4).reverse());
+  }, []);
 
   if (selectedClient) {
     return <ClientDetailView client={selectedClient} onBack={() => setSelectedClient(null)} />;
@@ -311,7 +342,7 @@ const CoachDashboard = () => {
           </div>
 
           <div className="space-y-3">
-            {mockClients.map((client) => (
+            {clients.map((client) => (
               <button
                 key={client.id}
                 onClick={() => setSelectedClient(client)}

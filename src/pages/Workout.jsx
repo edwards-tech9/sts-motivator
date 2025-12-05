@@ -1,12 +1,13 @@
-import { useState } from 'react';
-import { ChevronLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronLeft, CheckCircle } from 'lucide-react';
 import ExerciseCard from '../components/workout/ExerciseCard';
 import WarmupSection from '../components/workout/WarmupSection';
 import SetLoggingModal from '../components/workout/SetLoggingModal';
 import RestTimer from '../components/workout/RestTimer';
 import PRCelebration from '../components/workout/PRCelebration';
+import { saveWorkout, savePR, getPRs } from '../services/localStorage';
 
-// Mock data - will be replaced with Firestore
+// Sample workout data (this would come from the assigned program)
 const mockExercises = [
   { id: 1, name: 'DB Good Morning', sets: 4, reps: '8-10', tempo: '2112', rest: 90, lastWeight: 25, lastReps: [10, 10, 10, 10], muscleGroups: ['Hamstrings', 'Lower Back'] },
   { id: 2, name: 'Split Stance DB RDL', sets: 3, reps: '6-10', tempo: '3111', rest: 90, lastWeight: 25, lastReps: [10, 10, 10], muscleGroups: ['Hamstrings', 'Glutes'] },
@@ -23,6 +24,7 @@ const warmupExercises = [
 
 const Workout = ({ techMode, onToggleTechMode, onExit }) => {
   const [completedSets, setCompletedSets] = useState({});
+  const [loggedSets, setLoggedSets] = useState({});
   const [activeExercise, setActiveExercise] = useState(null);
   const [activeSetNumber, setActiveSetNumber] = useState(null);
   const [showRestTimer, setShowRestTimer] = useState(false);
@@ -30,6 +32,8 @@ const Workout = ({ techMode, onToggleTechMode, onExit }) => {
   const [prData, setPrData] = useState({ exercise: '', newPR: 0, previousPR: 0 });
   const [warmupExpanded, setWarmupExpanded] = useState(true);
   const [currentRestDuration, setCurrentRestDuration] = useState(90);
+  const [workoutStartTime] = useState(Date.now());
+  const [workoutComplete, setWorkoutComplete] = useState(false);
 
   const handleStartSet = (exercise, setNum) => {
     setActiveExercise(exercise);
@@ -40,16 +44,32 @@ const Workout = ({ techMode, onToggleTechMode, onExit }) => {
     const exerciseId = activeExercise.id;
     const setIndex = activeSetNumber - 1;
 
+    // Track completed sets
     setCompletedSets((prev) => ({
       ...prev,
       [exerciseId]: [...(prev[exerciseId] || []), setIndex],
     }));
 
-    if (data.weight > activeExercise.lastWeight) {
+    // Track logged data
+    setLoggedSets((prev) => ({
+      ...prev,
+      [exerciseId]: [
+        ...(prev[exerciseId] || []),
+        { setNum: activeSetNumber, ...data },
+      ],
+    }));
+
+    // Check for PR
+    const currentPRs = getPRs('demo');
+    const exercisePR = currentPRs[activeExercise.name]?.weight || activeExercise.lastWeight;
+
+    if (data.weight > exercisePR) {
+      // Save new PR
+      savePR('demo', activeExercise.name, data.weight, data.reps);
       setPrData({
         exercise: activeExercise.name,
         newPR: data.weight,
-        previousPR: activeExercise.lastWeight,
+        previousPR: exercisePR,
       });
       setShowPRCelebration(true);
     } else {
@@ -59,6 +79,31 @@ const Workout = ({ techMode, onToggleTechMode, onExit }) => {
 
     setActiveExercise(null);
     setActiveSetNumber(null);
+  };
+
+  // Save workout when complete
+  const handleFinishWorkout = () => {
+    const duration = Math.round((Date.now() - workoutStartTime) / 60000);
+
+    const workout = {
+      userId: 'demo',
+      date: new Date().toISOString(),
+      name: 'Lower Body - Strength',
+      duration,
+      exercises: mockExercises.map((ex) => ({
+        name: ex.name,
+        sets: loggedSets[ex.id] || [],
+      })),
+      completed: true,
+    };
+
+    saveWorkout(workout);
+    setWorkoutComplete(true);
+
+    // Exit after showing completion
+    setTimeout(() => {
+      onExit();
+    }, 2000);
   };
 
   const totalSets = mockExercises.reduce((acc, ex) => acc + ex.sets, 0);
@@ -146,6 +191,30 @@ const Workout = ({ techMode, onToggleTechMode, onExit }) => {
           <h3 className="text-gray-400 text-sm uppercase tracking-wide mb-3">Finisher / Accessory</h3>
           <p className="text-gray-300">Assisted hip airplanes 2×10, rolling plank 2×20</p>
         </div>
+
+        {/* Finish Workout Button */}
+        {progress >= 50 && !workoutComplete && (
+          <button
+            onClick={handleFinishWorkout}
+            className="w-full mt-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-4 rounded-2xl text-lg hover:scale-[1.02] transition-transform shadow-lg shadow-green-500/30 flex items-center justify-center gap-2"
+          >
+            <CheckCircle size={24} />
+            FINISH WORKOUT
+          </button>
+        )}
+
+        {/* Workout Complete Message */}
+        {workoutComplete && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+            <div className="text-center p-8">
+              <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <CheckCircle size={40} className="text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-white mb-2">Workout Complete!</h2>
+              <p className="text-gray-400">Great work. Your progress has been saved.</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {activeExercise && (
