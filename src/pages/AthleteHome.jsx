@@ -1,0 +1,116 @@
+import { Play, Trophy, BarChart3, MessageSquare, Dumbbell, Target, TrendingUp } from 'lucide-react';
+import StreakDisplay from '../components/dashboard/StreakDisplay';
+
+const AthleteHome = ({ onStartWorkout, userName = 'John' }) => (
+  <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black pb-24">
+    <header className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <p className="text-gray-400 text-sm">Welcome back,</p>
+          <h1 className="text-2xl font-bold text-white">{userName}</h1>
+        </div>
+        <div
+          className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold"
+          aria-label="User avatar"
+        >
+          {userName.slice(0, 2).toUpperCase()}
+        </div>
+      </div>
+
+      <StreakDisplay streak={8} weeklyTarget={4} weeklyCompleted={2} />
+
+      <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-6 border border-slate-700/50 shadow-2xl">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <p className="text-orange-400 font-semibold text-sm">TODAY'S WORKOUT</p>
+            <h2
+              className="text-2xl font-black text-white mt-1"
+              style={{ fontFamily: 'Oswald, sans-serif' }}
+            >
+              LOWER BODY
+            </h2>
+            <p className="text-gray-400 text-sm">Week 3 · Day 1 · Strength</p>
+          </div>
+          <div className="bg-orange-500/20 px-3 py-1 rounded-full">
+            <span className="text-orange-400 text-sm font-semibold">~55 min</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="bg-slate-900/50 rounded-xl p-3 text-center">
+            <Dumbbell className="text-gray-400 mx-auto mb-1" size={20} aria-hidden="true" />
+            <p className="text-white font-bold">5</p>
+            <p className="text-gray-500 text-xs">Exercises</p>
+          </div>
+          <div className="bg-slate-900/50 rounded-xl p-3 text-center">
+            <Target className="text-gray-400 mx-auto mb-1" size={20} aria-hidden="true" />
+            <p className="text-white font-bold">17</p>
+            <p className="text-gray-500 text-xs">Total Sets</p>
+          </div>
+          <div className="bg-slate-900/50 rounded-xl p-3 text-center">
+            <TrendingUp className="text-gray-400 mx-auto mb-1" size={20} aria-hidden="true" />
+            <p className="text-white font-bold">+5%</p>
+            <p className="text-gray-500 text-xs">Vol. Target</p>
+          </div>
+        </div>
+
+        <button
+          onClick={onStartWorkout}
+          className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-4 rounded-2xl text-lg hover:scale-[1.02] transition-transform shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-slate-800"
+        >
+          <Play size={24} fill="white" aria-hidden="true" />
+          START WORKOUT
+        </button>
+      </div>
+
+      <div className="mt-6 grid grid-cols-2 gap-4">
+        <div className="bg-slate-800/50 rounded-2xl p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <Trophy className="text-yellow-400" size={24} aria-hidden="true" />
+            <p className="text-white font-bold">Recent PRs</p>
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-400">Squat</span>
+              <span className="text-green-400 font-semibold">315 lbs</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-400">Deadlift</span>
+              <span className="text-green-400 font-semibold">395 lbs</span>
+            </div>
+          </div>
+        </div>
+        <div className="bg-slate-800/50 rounded-2xl p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <BarChart3 className="text-blue-400" size={24} aria-hidden="true" />
+            <p className="text-white font-bold">This Week</p>
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-400">Volume</span>
+              <span className="text-white font-semibold">42,500 lbs</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-400">Sessions</span>
+              <span className="text-white font-semibold">2 / 4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 bg-blue-500/10 border border-blue-500/30 rounded-2xl p-5">
+        <div className="flex items-center gap-3 mb-3">
+          <MessageSquare className="text-blue-400" size={20} aria-hidden="true" />
+          <p className="text-white font-bold">Coach Notes</p>
+        </div>
+        <p className="text-gray-300 text-sm">
+          "Great progress on your squat depth last week! Focus on controlled eccentrics today. If anything
+          feels off, drop weight 10% and prioritize form."
+        </p>
+        <p className="text-gray-500 text-xs mt-2">— Coach Mike, 2 days ago</p>
+      </div>
+    </header>
+  </div>
+);
+
+export default AthleteHome;

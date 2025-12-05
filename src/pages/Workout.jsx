@@ -1,0 +1,188 @@
+import { useState } from 'react';
+import { ChevronLeft } from 'lucide-react';
+import ExerciseCard from '../components/workout/ExerciseCard';
+import WarmupSection from '../components/workout/WarmupSection';
+import SetLoggingModal from '../components/workout/SetLoggingModal';
+import RestTimer from '../components/workout/RestTimer';
+import PRCelebration from '../components/workout/PRCelebration';
+
+// Mock data - will be replaced with Firestore
+const mockExercises = [
+  { id: 1, name: 'DB Good Morning', sets: 4, reps: '8-10', tempo: '2112', rest: 90, lastWeight: 25, lastReps: [10, 10, 10, 10], muscleGroups: ['Hamstrings', 'Lower Back'] },
+  { id: 2, name: 'Split Stance DB RDL', sets: 3, reps: '6-10', tempo: '3111', rest: 90, lastWeight: 25, lastReps: [10, 10, 10], muscleGroups: ['Hamstrings', 'Glutes'] },
+  { id: 3, name: 'Bulgarian Split Squat', sets: 3, reps: '10-12', tempo: '11x1', rest: 60, lastWeight: 30, lastReps: [12, 11, 10], muscleGroups: ['Quads', 'Glutes'] },
+  { id: 4, name: 'Leg Press', sets: 4, reps: '12-15', tempo: '2010', rest: 90, lastWeight: 180, lastReps: [15, 14, 13, 12], muscleGroups: ['Quads', 'Glutes'] },
+  { id: 5, name: 'Seated Calf Raise', sets: 3, reps: '15-20', tempo: '2111', rest: 45, lastWeight: 90, lastReps: [20, 18, 15], muscleGroups: ['Calves'] },
+];
+
+const warmupExercises = [
+  { name: 'Ankle Stretch w/ KB', prescription: '2×30s' },
+  { name: '90/90 Breathing', prescription: '2×10' },
+  { name: 'T-Spine Rotation', prescription: '2×10' },
+];
+
+const Workout = ({ techMode, onToggleTechMode, onExit }) => {
+  const [completedSets, setCompletedSets] = useState({});
+  const [activeExercise, setActiveExercise] = useState(null);
+  const [activeSetNumber, setActiveSetNumber] = useState(null);
+  const [showRestTimer, setShowRestTimer] = useState(false);
+  const [showPRCelebration, setShowPRCelebration] = useState(false);
+  const [prData, setPrData] = useState({ exercise: '', newPR: 0, previousPR: 0 });
+  const [warmupExpanded, setWarmupExpanded] = useState(true);
+  const [currentRestDuration, setCurrentRestDuration] = useState(90);
+
+  const handleStartSet = (exercise, setNum) => {
+    setActiveExercise(exercise);
+    setActiveSetNumber(setNum);
+  };
+
+  const handleLogSet = (data) => {
+    const exerciseId = activeExercise.id;
+    const setIndex = activeSetNumber - 1;
+
+    setCompletedSets((prev) => ({
+      ...prev,
+      [exerciseId]: [...(prev[exerciseId] || []), setIndex],
+    }));
+
+    if (data.weight > activeExercise.lastWeight) {
+      setPrData({
+        exercise: activeExercise.name,
+        newPR: data.weight,
+        previousPR: activeExercise.lastWeight,
+      });
+      setShowPRCelebration(true);
+    } else {
+      setCurrentRestDuration(activeExercise.rest);
+      setShowRestTimer(true);
+    }
+
+    setActiveExercise(null);
+    setActiveSetNumber(null);
+  };
+
+  const totalSets = mockExercises.reduce((acc, ex) => acc + ex.sets, 0);
+  const completedTotal = Object.values(completedSets).flat().length;
+  const progress = (completedTotal / totalSets) * 100;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black pb-24">
+      <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-lg border-b border-slate-800">
+        <div className="flex items-center justify-between p-4">
+          <button
+            onClick={onExit}
+            className="flex items-center gap-2 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-400 rounded-lg"
+            aria-label="Exit workout"
+          >
+            <ChevronLeft size={20} />
+            <span className="text-sm">Exit</span>
+          </button>
+          <p className="text-orange-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
+          <button
+            onClick={onToggleTechMode}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-orange-400 ${
+              techMode ? 'bg-orange-500 text-white' : 'bg-slate-700 text-gray-400'
+            }`}
+            aria-pressed={techMode}
+            aria-label={techMode ? 'Switch to simple mode' : 'Switch to tech mode'}
+          >
+            {techMode ? '🔬 TECH' : 'SIMPLE'}
+          </button>
+        </div>
+      </header>
+
+      <div className="p-6">
+        <div className="mb-2">
+          <span className="text-gray-400 text-sm">Week 3 · Day 1</span>
+        </div>
+        <h1
+          className="text-3xl font-black text-white mb-4 tracking-tight"
+          style={{ fontFamily: 'Oswald, sans-serif' }}
+        >
+          LOWER BODY - STRENGTH
+        </h1>
+
+        <div className="mb-6">
+          <div className="flex justify-between text-sm mb-2">
+            <span className="text-gray-400">
+              {completedTotal} of {totalSets} sets complete
+            </span>
+            <span className="text-orange-400 font-semibold">{Math.round(progress)}%</span>
+          </div>
+          <div
+            className="h-2 bg-slate-800 rounded-full overflow-hidden"
+            role="progressbar"
+            aria-valuenow={Math.round(progress)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Workout progress"
+          >
+            <div
+              className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        <WarmupSection
+          exercises={warmupExercises}
+          expanded={warmupExpanded}
+          onToggle={() => setWarmupExpanded(!warmupExpanded)}
+        />
+
+        {mockExercises.map((exercise, i) => (
+          <ExerciseCard
+            key={exercise.id}
+            exercise={exercise}
+            index={i + 1}
+            completedSets={completedSets[exercise.id] || []}
+            onStartSet={handleStartSet}
+            techMode={techMode}
+            isActive={activeExercise?.id === exercise.id}
+          />
+        ))}
+
+        <div className="bg-slate-800/30 rounded-2xl p-5 border border-slate-700/50">
+          <h3 className="text-gray-400 text-sm uppercase tracking-wide mb-3">Finisher / Accessory</h3>
+          <p className="text-gray-300">Assisted hip airplanes 2×10, rolling plank 2×20</p>
+        </div>
+      </div>
+
+      {activeExercise && (
+        <SetLoggingModal
+          exercise={activeExercise}
+          setNumber={activeSetNumber}
+          totalSets={activeExercise.sets}
+          onLog={handleLogSet}
+          onCancel={() => {
+            setActiveExercise(null);
+            setActiveSetNumber(null);
+          }}
+          techMode={techMode}
+        />
+      )}
+
+      {showRestTimer && (
+        <RestTimer
+          duration={currentRestDuration}
+          onComplete={() => setShowRestTimer(false)}
+          onSkip={() => setShowRestTimer(false)}
+        />
+      )}
+
+      <PRCelebration
+        show={showPRCelebration}
+        exercise={prData.exercise}
+        newPR={prData.newPR}
+        previousPR={prData.previousPR}
+        onClose={() => {
+          setShowPRCelebration(false);
+          setCurrentRestDuration(90);
+          setShowRestTimer(true);
+        }}
+      />
+    </div>
+  );
+};
+
+export default Workout;
