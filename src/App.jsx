@@ -385,7 +385,7 @@ const AthleteWorkoutView = ({ techMode, onToggleTechMode, onExit }) => {
             <ChevronLeft size={20} />
             <span className="text-sm">Exit</span>
           </button>
-          <p className="text-orange-400 font-bold text-sm tracking-wider">STS MOTIVATOR</p>
+          <p className="text-orange-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
           <button
             onClick={onToggleTechMode}
             className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${techMode ? 'bg-orange-500 text-white' : 'bg-slate-700 text-gray-400'}`}
@@ -485,7 +485,7 @@ const CoachDashboard = () => {
       <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-lg border-b border-slate-800">
         <div className="flex items-center justify-between p-4">
           <div>
-            <p className="text-orange-400 font-bold text-sm tracking-wider">STS MOTIVATOR</p>
+            <p className="text-orange-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
             <p className="text-gray-400 text-xs">COACH DASHBOARD</p>
           </div>
           <div className="flex items-center gap-3">

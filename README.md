@@ -1,4 +1,4 @@
-# STS MOTIVATOR
+# STS M0TIV8R
 
 Personal training app for coaches and athletes.
 
