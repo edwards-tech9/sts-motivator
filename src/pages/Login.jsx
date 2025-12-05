@@ -89,11 +89,11 @@ const Login = ({ onSuccess }) => {
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black flex flex-col items-center justify-center p-6">
       {/* Logo */}
       <div className="mb-8 text-center">
-        <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <span className="text-white text-2xl font-black" style={{ fontFamily: 'Oswald, sans-serif' }}>
-            STS
-          </span>
-        </div>
+        <img
+          src="/logo.png"
+          alt="Scullin Training Systems"
+          className="w-32 h-32 object-contain mx-auto mb-4"
+        />
         <h1
           className="text-3xl font-black text-white tracking-tight"
           style={{ fontFamily: 'Oswald, sans-serif' }}

@@ -8,9 +8,12 @@ const AthleteHome = ({ onStartWorkout, userName = 'John' }) => (
       <header className="p-6">
         <SlideIn direction="down" delay={0}>
           <div className="flex items-center justify-between mb-6">
-            <div>
-              <p className="text-gray-400 text-sm">Welcome back,</p>
-              <h1 className="text-2xl font-bold text-white">{userName}</h1>
+            <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="Scullin Training Systems" className="w-14 h-14 object-contain" />
+              <div>
+                <p className="text-gray-400 text-sm">Welcome back,</p>
+                <h1 className="text-2xl font-bold text-white">{userName}</h1>
+              </div>
             </div>
             <div
               className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold"
