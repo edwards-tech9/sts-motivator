@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { isFirebaseConfigured } from './services/firebase';
 import BottomNav from './components/layout/BottomNav';
@@ -194,10 +193,8 @@ const AppContent = () => {
 // Root app with providers
 export default function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
