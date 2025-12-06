@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Video, Play, Pause, MessageSquare, Check, X, Clock, ChevronRight, Filter, Search, RotateCcw, Maximize, Volume2, VolumeX } from 'lucide-react';
 import { PageTransition, SlideIn, StaggerContainer } from '../components/ui/AnimatedComponents';
+import { getFormChecks, saveFormCheck, updateFormCheckFeedback } from '../services/localStorage';
 
 // Sample video URLs (using free stock fitness videos)
 const SAMPLE_VIDEOS = [
@@ -9,6 +10,74 @@ const SAMPLE_VIDEOS = [
   'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
   'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
 ];
+
+// Initialize demo form checks if none exist
+const initializeFormChecks = () => {
+  const existing = getFormChecks();
+  if (existing.length > 0) return existing;
+
+  const demoFormChecks = [
+    {
+      id: 'formcheck_1',
+      athleteId: 'athlete_1',
+      athleteName: 'John Davidson',
+      athleteAvatar: 'JD',
+      exercise: 'Back Squat',
+      weight: '275 lbs',
+      reps: 5,
+      submittedAt: new Date(Date.now() - 3600000).toISOString(),
+      status: 'pending',
+      videoUrl: SAMPLE_VIDEOS[0],
+      notes: 'Feeling unsure about my depth on these heavier sets',
+    },
+    {
+      id: 'formcheck_2',
+      athleteId: 'athlete_2',
+      athleteName: 'Emma Sullivan',
+      athleteAvatar: 'ES',
+      exercise: 'Deadlift',
+      weight: '315 lbs',
+      reps: 3,
+      submittedAt: new Date(Date.now() - 7200000).toISOString(),
+      status: 'pending',
+      videoUrl: SAMPLE_VIDEOS[1],
+      notes: 'Back felt a bit rounded at the top',
+    },
+    {
+      id: 'formcheck_3',
+      athleteId: 'athlete_1',
+      athleteName: 'John Davidson',
+      athleteAvatar: 'JD',
+      exercise: 'Bench Press',
+      weight: '185 lbs',
+      reps: 8,
+      submittedAt: new Date(Date.now() - 86400000).toISOString(),
+      status: 'reviewed',
+      videoUrl: SAMPLE_VIDEOS[2],
+      notes: 'Working on bar path',
+      feedback: 'Great improvement! Bar path is much better. Focus on keeping your shoulder blades pinched throughout.',
+      rating: 'good',
+    },
+    {
+      id: 'formcheck_4',
+      athleteId: 'athlete_3',
+      athleteName: 'Sarah Martinez',
+      athleteAvatar: 'SM',
+      exercise: 'Romanian Deadlift',
+      weight: '135 lbs',
+      reps: 10,
+      submittedAt: new Date(Date.now() - 172800000).toISOString(),
+      status: 'reviewed',
+      videoUrl: SAMPLE_VIDEOS[3],
+      notes: 'First time trying RDLs',
+      feedback: 'Good start! Keep the bar closer to your legs and push hips back more.',
+      rating: 'needs-work',
+    },
+  ];
+
+  demoFormChecks.forEach(fc => saveFormCheck(fc));
+  return demoFormChecks;
+};
 
 // Video Player Component
 const FormCheckVideoPlayer = ({ videoUrl, onClose }) => {
@@ -158,76 +227,18 @@ const FormCheckVideoPlayer = ({ videoUrl, onClose }) => {
   );
 };
 
-// Mock form check submissions
-const mockFormChecks = [
-  {
-    id: 1,
-    athleteId: 'athlete-1',
-    athleteName: 'John Davidson',
-    athleteAvatar: 'JD',
-    exercise: 'Back Squat',
-    weight: '275 lbs',
-    reps: 5,
-    submittedAt: new Date(Date.now() - 3600000).toISOString(),
-    status: 'pending',
-    videoUrl: SAMPLE_VIDEOS[0],
-    thumbnailUrl: '/exercises/squat.jpg',
-    notes: 'Feeling unsure about my depth on these heavier sets',
-  },
-  {
-    id: 2,
-    athleteId: 'athlete-2',
-    athleteName: 'Emma Sullivan',
-    athleteAvatar: 'ES',
-    exercise: 'Deadlift',
-    weight: '315 lbs',
-    reps: 3,
-    submittedAt: new Date(Date.now() - 7200000).toISOString(),
-    status: 'pending',
-    videoUrl: SAMPLE_VIDEOS[1],
-    thumbnailUrl: '/exercises/deadlift.jpg',
-    notes: 'Back felt a bit rounded at the top',
-  },
-  {
-    id: 3,
-    athleteId: 'athlete-1',
-    athleteName: 'John Davidson',
-    athleteAvatar: 'JD',
-    exercise: 'Bench Press',
-    weight: '185 lbs',
-    reps: 8,
-    submittedAt: new Date(Date.now() - 86400000).toISOString(),
-    status: 'reviewed',
-    videoUrl: SAMPLE_VIDEOS[2],
-    thumbnailUrl: '/exercises/bench.jpg',
-    notes: 'Working on bar path',
-    feedback: 'Great improvement! Bar path is much better. Focus on keeping your shoulder blades pinched throughout.',
-    rating: 'good',
-  },
-  {
-    id: 4,
-    athleteId: 'athlete-3',
-    athleteName: 'Sarah Martinez',
-    athleteAvatar: 'SM',
-    exercise: 'Romanian Deadlift',
-    weight: '135 lbs',
-    reps: 10,
-    submittedAt: new Date(Date.now() - 172800000).toISOString(),
-    status: 'reviewed',
-    videoUrl: SAMPLE_VIDEOS[3],
-    thumbnailUrl: '/exercises/rdl.jpg',
-    notes: 'First time trying RDLs',
-    feedback: 'Good start! Keep the bar closer to your legs and push hips back more.',
-    rating: 'needs-work',
-  },
-];
-
 const FormChecks = () => {
-  const [formChecks, setFormChecks] = useState(mockFormChecks);
+  const [formChecks, setFormChecks] = useState([]);
   const [filter, setFilter] = useState('all');
   const [selectedCheck, setSelectedCheck] = useState(null);
   const [feedbackText, setFeedbackText] = useState('');
   const [rating, setRating] = useState('');
+
+  // Load form checks from localStorage on mount
+  useEffect(() => {
+    const data = initializeFormChecks();
+    setFormChecks(data);
+  }, []);
 
   const filteredChecks = formChecks.filter(check => {
     if (filter === 'all') return true;
@@ -239,13 +250,20 @@ const FormChecks = () => {
   const handleSubmitFeedback = () => {
     if (!selectedCheck || !feedbackText.trim() || !rating) return;
 
-    setFormChecks(prev =>
-      prev.map(check =>
-        check.id === selectedCheck.id
-          ? { ...check, status: 'reviewed', feedback: feedbackText, rating }
-          : check
-      )
-    );
+    // Update in localStorage
+    const updated = updateFormCheckFeedback(selectedCheck.id, feedbackText, rating);
+
+    if (updated) {
+      // Update local state
+      setFormChecks(prev =>
+        prev.map(check =>
+          check.id === selectedCheck.id
+            ? { ...check, status: 'reviewed', feedback: feedbackText, rating }
+            : check
+        )
+      );
+    }
+
     setSelectedCheck(null);
     setFeedbackText('');
     setRating('');

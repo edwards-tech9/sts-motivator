@@ -38,8 +38,8 @@ const WeightLogModal = ({ userId, onClose, onSave }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-      <div className="bg-carbon-900 rounded-3xl w-full max-w-sm overflow-hidden">
+    <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-carbon-900 rounded-3xl w-full max-w-sm overflow-hidden" onClick={(e) => e.stopPropagation()}>
         <div className="p-5 border-b border-carbon-700 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
@@ -121,8 +121,8 @@ const SleepLogModal = ({ userId, onClose, onSave }) => {
   const qualityColors = ['', 'text-red-400', 'text-orange-400', 'text-yellow-400', 'text-green-400', 'text-emerald-400'];
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-      <div className="bg-carbon-900 rounded-3xl w-full max-w-sm overflow-hidden">
+    <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-carbon-900 rounded-3xl w-full max-w-sm overflow-hidden" onClick={(e) => e.stopPropagation()}>
         <div className="p-5 border-b border-carbon-700 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
@@ -245,9 +245,9 @@ const NutritionLogModal = ({ userId, onClose, onSave }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-      <div className="bg-carbon-900 rounded-3xl w-full max-w-sm overflow-hidden max-h-[90vh] overflow-y-auto">
-        <div className="p-5 border-b border-carbon-700 flex items-center justify-between sticky top-0 bg-carbon-900">
+    <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-carbon-900 rounded-3xl w-full max-w-sm overflow-hidden max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="p-5 border-b border-carbon-700 flex items-center justify-between sticky top-0 bg-carbon-900 z-10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
               <Utensils className="text-green-400" size={20} />
@@ -374,9 +374,9 @@ const MeasurementsLogModal = ({ userId, onClose, onSave }) => {
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-      <div className="bg-carbon-900 rounded-3xl w-full max-w-sm overflow-hidden max-h-[90vh] overflow-y-auto">
-        <div className="p-5 border-b border-carbon-700 flex items-center justify-between sticky top-0 bg-carbon-900">
+    <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-carbon-900 rounded-3xl w-full max-w-sm overflow-hidden max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="p-5 border-b border-carbon-700 flex items-center justify-between sticky top-0 bg-carbon-900 z-10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center">
               <Ruler className="text-orange-400" size={20} />

@@ -11,6 +11,10 @@ const STORAGE_KEYS = {
   MESSAGES: 'sts_messages',
   EXERCISE_VIDEOS: 'sts_exercise_videos',
   PROFILE: 'sts_profile',
+  FORM_CHECKS: 'sts_form_checks',
+  ENCOURAGEMENTS: 'sts_encouragements',
+  NOTIFICATIONS: 'sts_notifications',
+  LIVE_ACTIVITY: 'sts_live_activity',
 };
 
 // Helper to get/set JSON from localStorage
@@ -351,6 +355,156 @@ export const saveExerciseVideo = (exerciseName, videoData) => {
 export const getExerciseVideo = (exerciseName) => {
   const videos = getExerciseVideos();
   return videos[exerciseName] || null;
+};
+
+// Form Checks
+export const getFormChecks = () => getItem(STORAGE_KEYS.FORM_CHECKS, []);
+
+export const saveFormCheck = (formCheck) => {
+  const formChecks = getItem(STORAGE_KEYS.FORM_CHECKS, []);
+  const existingIndex = formChecks.findIndex(fc => fc.id === formCheck.id);
+
+  if (existingIndex >= 0) {
+    formChecks[existingIndex] = { ...formChecks[existingIndex], ...formCheck };
+  } else {
+    formCheck.id = formCheck.id || `formcheck_${Date.now()}`;
+    formCheck.submittedAt = formCheck.submittedAt || new Date().toISOString();
+    formChecks.push(formCheck);
+  }
+
+  setItem(STORAGE_KEYS.FORM_CHECKS, formChecks);
+  return formCheck;
+};
+
+export const updateFormCheckFeedback = (formCheckId, feedback, rating) => {
+  const formChecks = getItem(STORAGE_KEYS.FORM_CHECKS, []);
+  const index = formChecks.findIndex(fc => fc.id === formCheckId);
+  if (index >= 0) {
+    formChecks[index] = {
+      ...formChecks[index],
+      feedback,
+      rating,
+      status: 'reviewed',
+      reviewedAt: new Date().toISOString(),
+    };
+    setItem(STORAGE_KEYS.FORM_CHECKS, formChecks);
+    return formChecks[index];
+  }
+  return null;
+};
+
+// Encouragements
+export const getEncouragements = () => getItem(STORAGE_KEYS.ENCOURAGEMENTS, []);
+
+export const saveEncouragement = (encouragement) => {
+  const encouragements = getItem(STORAGE_KEYS.ENCOURAGEMENTS, []);
+  encouragement.id = `enc_${Date.now()}`;
+  encouragement.sentAt = new Date().toISOString();
+  encouragements.push(encouragement);
+  setItem(STORAGE_KEYS.ENCOURAGEMENTS, encouragements);
+  return encouragement;
+};
+
+export const getTodaysEncouragements = () => {
+  const encouragements = getEncouragements();
+  const today = new Date().toDateString();
+  return encouragements.filter(e => new Date(e.sentAt).toDateString() === today);
+};
+
+// Notifications
+export const getNotifications = () => getItem(STORAGE_KEYS.NOTIFICATIONS, []);
+
+export const addNotification = (notification) => {
+  const notifications = getItem(STORAGE_KEYS.NOTIFICATIONS, []);
+  notification.id = `notif_${Date.now()}`;
+  notification.createdAt = new Date().toISOString();
+  notification.read = false;
+  notifications.unshift(notification); // Add to start
+  // Keep only last 50 notifications
+  if (notifications.length > 50) notifications.pop();
+  setItem(STORAGE_KEYS.NOTIFICATIONS, notifications);
+  return notification;
+};
+
+export const markNotificationRead = (notificationId) => {
+  const notifications = getItem(STORAGE_KEYS.NOTIFICATIONS, []);
+  const index = notifications.findIndex(n => n.id === notificationId);
+  if (index >= 0) {
+    notifications[index].read = true;
+    setItem(STORAGE_KEYS.NOTIFICATIONS, notifications);
+  }
+};
+
+// Live Activity (for demo - simulates real athletes)
+export const getLiveActivity = () => {
+  const athletes = getAthletes();
+  const workouts = getWorkouts();
+
+  // Create activity from actual athlete data
+  const activity = athletes.slice(0, 10).map((athlete, i) => {
+    const recentWorkout = workouts.find(w => w.athleteId === athlete.id);
+    const actions = [
+      { action: 'Just hit a PR!', type: 'pr' },
+      { action: 'Finished their workout!', type: 'complete' },
+      { action: 'Set 3 of 4 complete', type: 'set' },
+      { action: 'Going for a PR attempt...', type: 'attempt' },
+      { action: 'Starting their workout', type: 'start' },
+    ];
+    const randomAction = actions[Math.floor(Math.random() * actions.length)];
+
+    return {
+      id: athlete.id,
+      name: athlete.name,
+      avatar: athlete.name.split(' ').map(n => n[0]).join(''),
+      color: `from-${['blue', 'pink', 'purple', 'green', 'orange'][i % 5]}-500 to-${['blue', 'pink', 'purple', 'green', 'orange'][i % 5]}-600`,
+      action: randomAction.action,
+      type: randomAction.type,
+      exercise: recentWorkout?.exercises?.[0]?.name || 'Strength Training',
+      time: ['now', '1m ago', '2m ago', '5m ago', '10m ago'][Math.floor(Math.random() * 5)],
+    };
+  });
+
+  return activity.length > 0 ? activity : null; // Return null to use mock data as fallback
+};
+
+// Assign program to athlete
+export const assignProgramToAthlete = (athleteId, program) => {
+  const athletes = getItem(STORAGE_KEYS.ATHLETES, []);
+  const index = athletes.findIndex(a => a.id === athleteId);
+
+  if (index >= 0) {
+    athletes[index] = {
+      ...athletes[index],
+      currentProgram: program.name,
+      programId: program.id,
+      programAssignedAt: new Date().toISOString(),
+    };
+    setItem(STORAGE_KEYS.ATHLETES, athletes);
+
+    // Add notification
+    addNotification({
+      type: 'program_assigned',
+      title: 'New Program Assigned',
+      message: `${program.name} has been assigned to ${athletes[index].name}`,
+      athleteId,
+      programId: program.id,
+    });
+
+    return athletes[index];
+  }
+  return null;
+};
+
+// Send form check request to athlete
+export const requestFormCheck = (athleteId, exercise) => {
+  const notification = addNotification({
+    type: 'form_check_request',
+    title: 'Form Check Requested',
+    message: `Your coach has requested a form check for ${exercise || 'your next set'}`,
+    athleteId,
+    exercise,
+  });
+  return notification;
 };
 
 // Call initialize on import

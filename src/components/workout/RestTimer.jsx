@@ -122,16 +122,19 @@ const RestTimer = ({ duration, onComplete, onSkip }) => {
         </button>
       </div>
 
-      <button
-        onClick={onSkip}
-        className="bg-gold-gradient text-carbon-900 font-bold py-4 px-16 rounded-full text-lg hover:scale-105 transition-transform shadow-lg shadow-gold-500/30 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-offset-2 focus:ring-offset-carbon-900"
-      >
-        SKIP REST
-      </button>
+      {/* Skip Rest Button - positioned above live feed */}
+      <div className={`${socialSettings.showLiveActivity && socialSettings.socialVisibility !== 'private' ? 'mb-48' : ''} relative z-[60]`}>
+        <button
+          onClick={onSkip}
+          className="bg-gold-gradient text-carbon-900 font-bold py-4 px-16 rounded-full text-lg hover:scale-105 transition-transform shadow-lg shadow-gold-500/30 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-offset-2 focus:ring-offset-carbon-900"
+        >
+          SKIP REST
+        </button>
+      </div>
 
       {/* Live Activity Feed - Shown during rest */}
       {socialSettings.showLiveActivity && socialSettings.socialVisibility !== 'private' && (
-        <div className="absolute bottom-0 left-0 right-0 bg-carbon-900/95 backdrop-blur-lg border-t border-carbon-700">
+        <div className="absolute bottom-0 left-0 right-0 bg-carbon-900/95 backdrop-blur-lg border-t border-carbon-700 z-[55]">
           <button
             onClick={() => setShowLiveFeed(!showLiveFeed)}
             className="w-full flex items-center justify-between p-3 hover:bg-carbon-800/50 transition-colors"

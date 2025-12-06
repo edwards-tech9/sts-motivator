@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { Radio, Flame, Trophy, TrendingUp, Dumbbell, Clock, Filter, Users } from 'lucide-react';
 import { PageTransition, SlideIn, StaggerContainer, ScaleIn } from '../components/ui/AnimatedComponents';
 import { getSocialSettings } from '../components/settings/SocialSettings';
+import { getLiveActivity, saveEncouragement } from '../services/localStorage';
 
-// Simulated live users working out
+// Fallback mock data when no real athletes
 const MOCK_LIVE_USERS = [
   { id: 1, name: 'Mike C.', avatar: 'MC', color: 'from-blue-500 to-blue-600', action: 'Just hit 315 lb squat!', time: '2m ago', type: 'pr', exercise: 'Squat' },
   { id: 2, name: 'Sarah J.', avatar: 'SJ', color: 'from-pink-500 to-pink-600', action: 'Finished leg day!', time: '5m ago', type: 'complete', exercise: 'Workout Complete' },
@@ -18,23 +19,45 @@ const MOCK_LIVE_USERS = [
 ];
 
 const LiveActivity = () => {
-  const [liveUsers, setLiveUsers] = useState(MOCK_LIVE_USERS);
+  const [liveUsers, setLiveUsers] = useState([]);
   const [encouragedUsers, setEncouragedUsers] = useState([]);
   const [filter, setFilter] = useState('all');
   const socialSettings = getSocialSettings();
 
-  // Simulate live activity updates
+  // Load live activity - try real data first, fallback to mock
+  const loadLiveActivity = () => {
+    const realActivity = getLiveActivity();
+    if (realActivity && realActivity.length > 0) {
+      return realActivity;
+    }
+    // Fallback to mock data with random shuffle
+    const shuffled = [...MOCK_LIVE_USERS].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 6 + Math.floor(Math.random() * 4));
+  };
+
+  // Initial load and periodic updates
   useEffect(() => {
+    setLiveUsers(loadLiveActivity());
+
     const interval = setInterval(() => {
-      // Randomly shuffle and update users
-      const shuffled = [...MOCK_LIVE_USERS].sort(() => 0.5 - Math.random());
-      setLiveUsers(shuffled.slice(0, 6 + Math.floor(Math.random() * 4)));
+      setLiveUsers(loadLiveActivity());
     }, 5000);
     return () => clearInterval(interval);
   }, []);
 
   const handleEncourage = (userId) => {
     if (!encouragedUsers.includes(userId)) {
+      // Find the user to get their details
+      const user = liveUsers.find(u => u.id === userId);
+      if (user) {
+        // Persist encouragement to localStorage
+        saveEncouragement({
+          toUserId: userId,
+          toUserName: user.name,
+          message: 'Sent encouragement',
+          fromPage: 'live-activity',
+        });
+      }
       setEncouragedUsers([...encouragedUsers, userId]);
     }
   };

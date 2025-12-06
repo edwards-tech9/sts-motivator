@@ -1,10 +1,33 @@
 import { useState, useEffect } from 'react';
-import { Bell, ChevronRight, Plus, AlertTriangle, BarChart3, Video, MessageSquare, Menu, ChevronLeft, Zap, TrendingUp, Activity, X, Send, Film, UserPlus, Clipboard, Target, Gauge, Sparkles, Check } from 'lucide-react';
-import { getAthletes, getWorkouts, addMessage } from '../services/localStorage';
+import { Bell, ChevronRight, Plus, AlertTriangle, BarChart3, Video, MessageSquare, Menu, ChevronLeft, Zap, TrendingUp, Activity, X, Send, Film, UserPlus, Clipboard, Target, Gauge, Sparkles, Check, Info } from 'lucide-react';
+import { getAthletes, getWorkouts, addMessage, assignProgramToAthlete, requestFormCheck, addNotification } from '../services/localStorage';
 import { getAthleteReadiness, generateProgramSuggestions, generatePredictiveWorkout } from '../services/predictiveAnalysis';
 import { getAIProgramSuggestions } from '../services/aiProgramService';
-import { generateAlertMessages, generateSmartMessages } from '../services/smartMessaging';
+import { generateSmartMessages } from '../services/smartMessaging';
+import { getExercise } from '../data/exercises';
 import VideoManager from '../components/coach/VideoManager';
+
+// Simple Toast component
+const Toast = ({ message, type = 'info', onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 3000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  const bgColor = type === 'success' ? 'bg-green-500/20 border-green-500/30 text-green-400'
+    : type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-400'
+    : 'bg-gold-500/20 border-gold-500/30 text-gold-400';
+
+  return (
+    <div
+      className={`fixed top-20 left-1/2 -translate-x-1/2 z-[60] px-6 py-3 rounded-xl border backdrop-blur-lg ${bgColor} animate-slide-up`}
+      role="alert"
+      aria-live="polite"
+    >
+      {message}
+    </div>
+  );
+};
 
 // Default clients that show if no athletes in storage
 const defaultClients = [
@@ -196,7 +219,7 @@ const ProgramSuggestionsCard = ({ athleteId, athleteProfile, onSelectProgram }) 
 };
 
 // Smart Workout Editor Component
-const SmartWorkoutCard = ({ athleteId, programDay }) => {
+const SmartWorkoutCard = ({ athleteId, programDay, onPush }) => {
   const [predictedWorkout, setPredictedWorkout] = useState(null);
   const [editMode, setEditMode] = useState(false);
 
@@ -298,7 +321,13 @@ const SmartWorkoutCard = ({ athleteId, programDay }) => {
 
       <button
         onClick={() => {
-          alert('Workout pushed to athlete! They will receive a notification.');
+          addNotification({
+            type: 'workout_pushed',
+            title: 'New Workout Available',
+            message: `Your coach has pushed a new workout: ${predictedWorkout?.name || 'Custom Workout'}`,
+            athleteId,
+          });
+          onPush?.();
         }}
         className="w-full mt-4 bg-gold-gradient text-carbon-900 font-bold py-3 rounded-xl hover:scale-[1.02] transition-transform"
       >
@@ -390,7 +419,7 @@ const ClientDetailView = ({ client, onBack, onMessage, onShowOptions }) => {
           }}
           onAssignProgram={() => {
             setShowLocalOptions(false);
-            alert('Program assignment will be available in the next update!');
+            setShowAssignProgram(true);
           }}
           onViewProgress={() => {
             setShowLocalOptions(false);
@@ -554,11 +583,19 @@ const ClientDetailView = ({ client, onBack, onMessage, onShowOptions }) => {
               athleteId={client.id}
               athleteProfile={{ goal: client.goal, level: client.level }}
               onSelectProgram={(program) => {
-                // In production, this would navigate to ProgramBuilder with pre-filled data
-                alert(`Program "${program.name}" selected! This would open in Program Builder.`);
+                assignProgramToAthlete(client.id, program);
+                setPushSuccess(true);
+                setTimeout(() => setPushSuccess(false), 3000);
               }}
             />
-            <SmartWorkoutCard athleteId={client.id} programDay={sampleProgramDay} />
+            <SmartWorkoutCard
+              athleteId={client.id}
+              programDay={sampleProgramDay}
+              onPush={() => {
+                setPushSuccess(true);
+                setTimeout(() => setPushSuccess(false), 3000);
+              }}
+            />
           </>
         )}
 
@@ -636,8 +673,10 @@ const ClientDetailView = ({ client, onBack, onMessage, onShowOptions }) => {
           client={client}
           onClose={() => setShowAssignProgram(false)}
           onAssign={(program) => {
-            // In a real app, this would update the client's program
-            alert(`${program.name} assigned to ${client.name}!`);
+            assignProgramToAthlete(client.id, program);
+            setShowAssignProgram(false);
+            setPushSuccess(true);
+            setTimeout(() => setPushSuccess(false), 3000);
           }}
         />
       )}
@@ -977,12 +1016,16 @@ const AssignProgramModal = ({ client, onClose, onAssign }) => {
 };
 
 // Client Options Menu Component
-const ClientOptionsMenu = ({ client, onClose, onMessage, onAssignProgram, onViewProgress }) => {
+const ClientOptionsMenu = ({ client, onClose, onMessage, onAssignProgram, onViewProgress, onRequestFormCheck }) => {
   const options = [
     { icon: MessageSquare, label: 'Send Message', action: onMessage },
     { icon: Clipboard, label: 'Assign Program', action: onAssignProgram },
     { icon: BarChart3, label: 'View Progress', action: onViewProgress },
-    { icon: Video, label: 'Request Form Check', action: () => { onClose(); alert('Form check request sent!'); } },
+    { icon: Video, label: 'Request Form Check', action: () => {
+      requestFormCheck(client.id);
+      onClose();
+      onRequestFormCheck?.();
+    }},
   ];
 
   return (
@@ -1040,9 +1083,16 @@ const CoachDashboard = ({ onNavigate }) => {
   const [optionsMenuClient, setOptionsMenuClient] = useState(null);
   const [showWorkoutsSummary, setShowWorkoutsSummary] = useState(false);
   const [filterNeedsAttention, setFilterNeedsAttention] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [showExerciseInfo, setShowExerciseInfo] = useState(null);
 
   // Track which quick messages have been sent (for inline confirmation)
   const [sentMessages, setSentMessages] = useState({});
+
+  // Helper to show toast
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+  };
 
   useEffect(() => {
     // Load athletes from localStorage
@@ -1348,7 +1398,7 @@ const CoachDashboard = ({ onNavigate }) => {
                           const client = clients.find(c => c.name.includes(item.name.split(' ')[0]));
                           if (client) setMessageClient(client);
                         } else if (item.actionLink.type === 'exercise') {
-                          alert(`View ${item.actionLink.label} details - coming soon!`);
+                          setShowExerciseInfo(item.actionLink.label);
                         } else if (item.actionLink.type === 'workout') {
                           const client = clients.find(c => c.id === item.clientId);
                           if (client) setSelectedClient(client);
@@ -1587,6 +1637,84 @@ const CoachDashboard = ({ onNavigate }) => {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Exercise Info Modal */}
+      {showExerciseInfo && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+          <div className="bg-carbon-800 rounded-3xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-white">{showExerciseInfo}</h3>
+              <button
+                onClick={() => setShowExerciseInfo(null)}
+                className="p-2 hover:bg-carbon-700 rounded-xl"
+              >
+                <X className="text-gray-400" size={20} />
+              </button>
+            </div>
+
+            {(() => {
+              const exerciseData = getExercise(showExerciseInfo);
+              if (!exerciseData) {
+                return <p className="text-gray-400">No detailed information available for this exercise.</p>;
+              }
+              return (
+                <>
+                  {exerciseData.primaryMuscles?.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {exerciseData.primaryMuscles.map((muscle, i) => (
+                        <span key={i} className="px-2 py-1 bg-gold-500/20 text-gold-400 text-xs rounded-full capitalize">
+                          {muscle}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {exerciseData.instructions?.length > 0 && (
+                    <div className="space-y-2 mb-4">
+                      <p className="text-gray-400 text-sm font-semibold">Instructions:</p>
+                      <ol className="space-y-1">
+                        {exerciseData.instructions.map((step, i) => (
+                          <li key={i} className="text-gray-300 text-sm flex gap-2">
+                            <span className="text-gold-400 font-semibold">{i + 1}.</span>
+                            {step}
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
+
+                  {exerciseData.tips?.length > 0 && (
+                    <div className="bg-gold-500/10 rounded-xl p-3 mb-4">
+                      <p className="text-gold-400 text-sm font-semibold mb-1">Tips:</p>
+                      <ul className="space-y-1">
+                        {exerciseData.tips.map((tip, i) => (
+                          <li key={i} className="text-gray-300 text-sm">• {tip}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+
+            <button
+              onClick={() => setShowExerciseInfo(null)}
+              className="w-full bg-carbon-700 text-white font-semibold py-3 rounded-xl hover:bg-carbon-600"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
     </div>
   );
