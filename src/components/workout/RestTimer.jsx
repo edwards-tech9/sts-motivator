@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Play, Pause, Users, Flame, ChevronUp, ChevronDown } from 'lucide-react';
 import { getSocialSettings } from '../settings/SocialSettings';
+import { saveEncouragement, getLiveActivity } from '../../services/localStorage';
 
 // Simulated live users working out
 const MOCK_LIVE_USERS = [
@@ -35,6 +36,15 @@ const RestTimer = ({ duration, onComplete, onSkip }) => {
 
   const handleEncourage = (userId) => {
     if (!encouragedUsers.includes(userId)) {
+      const user = liveUsers.find(u => u.id === userId);
+      if (user) {
+        saveEncouragement({
+          toUserId: userId,
+          toUserName: user.name,
+          message: 'Sent encouragement during rest',
+          fromPage: 'rest-timer',
+        });
+      }
       setEncouragedUsers([...encouragedUsers, userId]);
     }
   };

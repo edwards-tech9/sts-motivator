@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Flame, Zap, Star, Heart, Trophy, Users, Send, X } from 'lucide-react';
+import { saveEncouragement } from '../../services/localStorage';
 
 // Gaming Psychology: Variable Reward System
 // Messages are weighted by intensity to create dopamine-triggering unpredictability
@@ -61,26 +62,27 @@ const FloatingMessage = ({ message, position, onComplete }) => {
 
   return (
     <div
-      className="fixed pointer-events-none z-40 animate-float-up"
+      className="fixed pointer-events-none z-[70] animate-float-up transform-gpu"
       style={{
         bottom: `${position.y}%`,
-        left: `${position.x}%`,
+        left: '50%',
+        transform: 'translateX(-50%)',
       }}
     >
-      <div className={`px-4 py-2 rounded-full ${message.isXP ? 'bg-gold-500/90' : 'bg-carbon-800/90'} backdrop-blur-sm border ${message.isXP ? 'border-gold-400' : 'border-carbon-600'} shadow-lg whitespace-nowrap`}>
+      <div className={`px-5 py-3 rounded-2xl ${message.isXP ? 'bg-gold-500' : 'bg-carbon-800/95'} backdrop-blur-md border-2 ${message.isXP ? 'border-gold-300' : 'border-carbon-600'} shadow-2xl whitespace-nowrap`}>
         {message.fromUser ? (
-          <div className="flex items-center gap-2">
-            <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${message.fromUser.color} flex items-center justify-center text-white text-xs font-bold`}>
+          <div className="flex items-center gap-3">
+            <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${message.fromUser.color} flex items-center justify-center text-white text-sm font-bold shadow-md`}>
               {message.fromUser.avatar}
             </div>
-            <span className="text-white font-semibold text-sm">{message.text}</span>
-            <span className="text-xl">{message.emoji}</span>
+            <span className="text-white font-bold text-base">{message.text}</span>
+            <span className="text-2xl">{message.emoji}</span>
           </div>
         ) : message.isXP ? (
-          <span className="text-carbon-900 font-bold text-lg">{message.text}</span>
+          <span className="text-carbon-900 font-black text-xl tracking-wide">{message.text}</span>
         ) : (
-          <span className="text-white font-semibold text-lg">
-            {message.text} {message.emoji}
+          <span className="text-white font-bold text-xl">
+            {message.text} <span className="text-2xl">{message.emoji}</span>
           </span>
         )}
       </div>
@@ -301,8 +303,14 @@ const LiveEncouragement = ({
   }, [onSetComplete]); // Remove showXPGain and showEncouragement from deps to prevent re-triggers
 
   const handleEncourageUser = (activity) => {
-    // TODO: In production, this would send to real-time database
-    // For now, just track locally (no console.log in production)
+    // Persist encouragement to localStorage
+    saveEncouragement({
+      toUserId: activity.id,
+      toUserName: activity.user.name,
+      message: 'Sent encouragement during workout',
+      fromPage: 'live-encouragement',
+    });
+    setEncouragementCount(prev => prev + 1);
   };
 
   if (!isActive) return null;

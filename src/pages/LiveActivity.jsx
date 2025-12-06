@@ -22,6 +22,7 @@ const LiveActivity = () => {
   const [liveUsers, setLiveUsers] = useState([]);
   const [encouragedUsers, setEncouragedUsers] = useState([]);
   const [filter, setFilter] = useState('all');
+  const [showToast, setShowToast] = useState(null);
   const socialSettings = getSocialSettings();
 
   // Load live activity - try real data first, fallback to mock
@@ -57,6 +58,9 @@ const LiveActivity = () => {
           message: 'Sent encouragement',
           fromPage: 'live-activity',
         });
+        // Show toast notification
+        setShowToast(`Sent encouragement to ${user.name}!`);
+        setTimeout(() => setShowToast(null), 2500);
       }
       setEncouragedUsers([...encouragedUsers, userId]);
     }
@@ -251,6 +255,16 @@ const LiveActivity = () => {
               </div>
             </div>
           </ScaleIn>
+        )}
+
+        {/* Toast notification */}
+        {showToast && (
+          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] animate-slide-up">
+            <div className="bg-gold-500/90 backdrop-blur-lg px-6 py-3 rounded-full shadow-lg border border-gold-400/50 flex items-center gap-2">
+              <Flame className="text-carbon-900" size={18} />
+              <span className="text-carbon-900 font-semibold">{showToast}</span>
+            </div>
+          </div>
         )}
       </div>
     </PageTransition>
