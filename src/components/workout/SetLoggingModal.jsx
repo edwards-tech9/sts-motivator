@@ -1,11 +1,16 @@
 import { useState } from 'react';
-import { Minus, Plus, Camera } from 'lucide-react';
+import { Minus, Plus, Camera, Info, Play, X } from 'lucide-react';
 import useEscapeKey from '../../hooks/useEscapeKey';
+import { getExercise } from '../../data/exercises';
 
 const SetLoggingModal = ({ exercise, setNumber, totalSets, onLog, onCancel, techMode }) => {
   const [weight, setWeight] = useState(exercise.lastWeight);
   const [reps, setReps] = useState(exercise.lastReps[setNumber - 1] || 10);
   const [rpe, setRpe] = useState(7);
+  const [showVideo, setShowVideo] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
+
+  const exerciseData = getExercise(exercise.name);
 
   // Allow escape key to cancel
   useEscapeKey(onCancel);
@@ -25,7 +30,29 @@ const SetLoggingModal = ({ exercise, setNumber, totalSets, onLog, onCancel, tech
           >
             {exercise.name.toUpperCase()}
           </h2>
-          <p className="text-gray-400">Set {setNumber} of {totalSets}</p>
+          <p className="text-gray-400 mb-3">Set {setNumber} of {totalSets}</p>
+
+          {/* Info and Video Buttons */}
+          <div className="flex justify-center gap-3">
+            <button
+              onClick={() => setShowInfo(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-carbon-700/50 rounded-xl text-gray-400 hover:text-white hover:bg-carbon-600 transition-colors"
+            >
+              <Info size={16} />
+              <span className="text-sm">Info</span>
+            </button>
+            <button
+              onClick={() => exerciseData?.videoId && setShowVideo(true)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors ${
+                exerciseData?.videoId
+                  ? 'bg-gold-500/20 text-gold-400 hover:bg-gold-500/30'
+                  : 'bg-carbon-700/50 text-gray-500'
+              }`}
+            >
+              <Play size={16} fill={exerciseData?.videoId ? 'currentColor' : 'none'} />
+              <span className="text-sm">Demo</span>
+            </button>
+          </div>
         </div>
 
         <div className="bg-carbon-800/50 rounded-2xl p-4 mb-6">
@@ -141,6 +168,84 @@ const SetLoggingModal = ({ exercise, setNumber, totalSets, onLog, onCancel, tech
           Cancel
         </button>
       </div>
+
+      {/* Info Modal */}
+      {showInfo && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[60] p-4">
+          <div className="bg-carbon-800 rounded-3xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-white">{exercise.name}</h3>
+              <button onClick={() => setShowInfo(false)} className="p-2 hover:bg-carbon-700 rounded-xl">
+                <X className="text-gray-400" size={20} />
+              </button>
+            </div>
+
+            {exerciseData?.primaryMuscles?.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {exerciseData.primaryMuscles.map((muscle, i) => (
+                  <span key={i} className="px-2 py-1 bg-gold-500/20 text-gold-400 text-xs rounded-full capitalize">
+                    {muscle}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {exerciseData?.instructions?.length > 0 && (
+              <div className="space-y-2 mb-4">
+                <p className="text-gray-400 text-sm font-semibold">Instructions:</p>
+                <ol className="space-y-1">
+                  {exerciseData.instructions.map((step, i) => (
+                    <li key={i} className="text-gray-300 text-sm flex gap-2">
+                      <span className="text-gold-400 font-semibold">{i + 1}.</span>
+                      {step}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+
+            {exerciseData?.tips?.length > 0 && (
+              <div className="bg-gold-500/10 rounded-xl p-3 mb-4">
+                <p className="text-gold-400 text-sm font-semibold mb-1">Tips:</p>
+                <ul className="space-y-1">
+                  {exerciseData.tips.map((tip, i) => (
+                    <li key={i} className="text-gray-300 text-sm">• {tip}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <button
+              onClick={() => setShowInfo(false)}
+              className="w-full bg-carbon-700 text-white font-semibold py-3 rounded-xl hover:bg-carbon-600"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Video Modal */}
+      {showVideo && exerciseData?.videoId && (
+        <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-[60] p-4">
+          <div className="w-full max-w-2xl">
+            <div className="flex items-center justify-end mb-4">
+              <button onClick={() => setShowVideo(false)} className="p-2 hover:bg-carbon-800 rounded-xl">
+                <X className="text-gray-400" size={24} />
+              </button>
+            </div>
+            <div className="aspect-video bg-black rounded-2xl overflow-hidden">
+              <iframe
+                src={`https://www.youtube.com/embed/${exerciseData.videoId}?rel=0&autoplay=1`}
+                title={exercise.name}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

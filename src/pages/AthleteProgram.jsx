@@ -1,7 +1,128 @@
 import { useState } from 'react';
-import { Play, Calendar, ChevronRight, Dumbbell, Target, Clock, CheckCircle2, Lock, X, ChevronDown } from 'lucide-react';
+import { Play, Calendar, ChevronRight, Dumbbell, Target, Clock, CheckCircle2, Lock, X, ChevronDown, Info } from 'lucide-react';
 import { PageTransition, SlideIn, StaggerContainer } from '../components/ui/AnimatedComponents';
 import { getPrograms } from '../services/localStorage';
+import { getExercise } from '../data/exercises';
+
+// Exercise Info Modal for Program View
+const ProgramExerciseInfoModal = ({ exercise, onClose, onShowVideo }) => {
+  const exerciseData = getExercise(exercise.name);
+
+  return (
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+      <div className="bg-carbon-800 rounded-3xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-white">{exercise.name}</h3>
+          <button onClick={onClose} className="p-2 hover:bg-carbon-700 rounded-xl">
+            <X className="text-gray-400" size={20} />
+          </button>
+        </div>
+
+        {/* Target muscles */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {exercise.muscleGroups?.map((muscle, i) => (
+            <span key={i} className="px-2 py-1 bg-gold-500/20 text-gold-400 text-xs rounded-full">
+              {muscle}
+            </span>
+          ))}
+        </div>
+
+        {/* Prescription */}
+        <div className="bg-carbon-900/50 rounded-xl p-4 mb-4">
+          <div className="grid grid-cols-4 gap-2 text-center">
+            <div>
+              <p className="text-gray-400 text-xs">Sets</p>
+              <p className="text-white font-bold">{exercise.sets}</p>
+            </div>
+            <div>
+              <p className="text-gray-400 text-xs">Reps</p>
+              <p className="text-white font-bold">{exercise.reps}</p>
+            </div>
+            <div>
+              <p className="text-gray-400 text-xs">Tempo</p>
+              <p className="text-white font-bold">{exercise.tempo}</p>
+            </div>
+            <div>
+              <p className="text-gray-400 text-xs">Rest</p>
+              <p className="text-white font-bold">{exercise.rest}s</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Instructions from database */}
+        {exerciseData?.instructions?.length > 0 && (
+          <div className="space-y-2 mb-4">
+            <p className="text-gray-400 text-sm font-semibold">Instructions:</p>
+            <ol className="space-y-1">
+              {exerciseData.instructions.map((step, i) => (
+                <li key={i} className="text-gray-300 text-sm flex gap-2">
+                  <span className="text-gold-400 font-semibold">{i + 1}.</span>
+                  {step}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+
+        {/* Tips */}
+        {exerciseData?.tips?.length > 0 && (
+          <div className="bg-gold-500/10 rounded-xl p-3 mb-4">
+            <p className="text-gold-400 text-sm font-semibold mb-1">Tips:</p>
+            <ul className="space-y-1">
+              {exerciseData.tips.map((tip, i) => (
+                <li key={i} className="text-gray-300 text-sm">• {tip}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="flex gap-3">
+          {exerciseData?.videoId && (
+            <button
+              onClick={() => onShowVideo(exerciseData.videoId)}
+              className="flex-1 bg-gold-gradient text-carbon-900 font-bold py-3 rounded-xl flex items-center justify-center gap-2"
+            >
+              <Play size={18} />
+              Watch Demo
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="flex-1 bg-carbon-700 text-white font-semibold py-3 rounded-xl hover:bg-carbon-600"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Video Modal for Program View
+const ProgramVideoModal = ({ videoId, onClose }) => {
+  if (!videoId) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-4">
+      <div className="w-full max-w-2xl">
+        <div className="flex items-center justify-end mb-4">
+          <button onClick={onClose} className="p-2 hover:bg-carbon-800 rounded-xl">
+            <X className="text-gray-400" size={24} />
+          </button>
+        </div>
+        <div className="aspect-video bg-black rounded-2xl overflow-hidden">
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}?rel=0&autoplay=1`}
+            title="Exercise Demo"
+            className="w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Exercise templates for each day type
 const EXERCISE_TEMPLATES = {
@@ -91,6 +212,13 @@ const currentProgram = {
 const AthleteProgram = ({ onStartWorkout }) => {
   const [expandedWeek, setExpandedWeek] = useState(currentProgram.currentWeek);
   const [selectedDay, setSelectedDay] = useState(null);
+  const [showInfoModal, setShowInfoModal] = useState(null);
+  const [showVideoId, setShowVideoId] = useState(null);
+
+  const handleShowVideo = (videoId) => {
+    setShowInfoModal(null);
+    setShowVideoId(videoId);
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -290,52 +418,77 @@ const AthleteProgram = ({ onStartWorkout }) => {
                           {/* Expanded Exercise List */}
                           {selectedDay?.dayNum === day.dayNum && selectedDay?.weekNum === week.weekNum && (
                             <div className="mt-2 ml-4 space-y-2 animate-fade-in">
-                              {day.exercises.map((exercise, exIndex) => (
-                                <div
-                                  key={exercise.id}
-                                  className="bg-carbon-900/60 rounded-xl p-4 border border-carbon-700/30"
-                                >
-                                  <div className="flex justify-between items-start mb-2">
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-gold-400 font-bold text-sm">{exIndex + 1}</span>
-                                      <h4 className="text-white font-semibold">{exercise.name}</h4>
+                              {day.exercises.map((exercise, exIndex) => {
+                                const exerciseData = getExercise(exercise.name);
+                                return (
+                                  <div
+                                    key={exercise.id}
+                                    className="bg-carbon-900/60 rounded-xl p-4 border border-carbon-700/30"
+                                  >
+                                    <div className="flex justify-between items-start mb-2">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-gold-400 font-bold text-sm">{exIndex + 1}</span>
+                                        <h4 className="text-white font-semibold">{exercise.name}</h4>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        {/* Info Button */}
+                                        <button
+                                          onClick={() => setShowInfoModal(exercise)}
+                                          className="p-1.5 bg-carbon-700 rounded-lg text-gray-400 hover:text-white hover:bg-carbon-600 transition-colors"
+                                          aria-label={`Info for ${exercise.name}`}
+                                        >
+                                          <Info size={14} />
+                                        </button>
+                                        {/* Video Button */}
+                                        <button
+                                          onClick={() => exerciseData?.videoId && setShowVideoId(exerciseData.videoId)}
+                                          className={`p-1.5 rounded-lg transition-colors ${
+                                            exerciseData?.videoId
+                                              ? 'bg-gold-500/20 text-gold-400 hover:bg-gold-500/30'
+                                              : 'bg-carbon-700 text-gray-500'
+                                          }`}
+                                          aria-label={`Watch demo for ${exercise.name}`}
+                                        >
+                                          <Play size={14} fill={exerciseData?.videoId ? 'currentColor' : 'none'} />
+                                        </button>
+                                        {exercise.targetWeight > 0 && (
+                                          <span className="text-gold-400 text-sm font-semibold ml-1">
+                                            {exercise.targetWeight} lbs
+                                          </span>
+                                        )}
+                                      </div>
                                     </div>
-                                    {exercise.targetWeight > 0 && (
-                                      <span className="text-gold-400 text-sm font-semibold">
-                                        {exercise.targetWeight} lbs
-                                      </span>
-                                    )}
+                                    <div className="grid grid-cols-4 gap-2 text-center">
+                                      <div className="bg-carbon-800 rounded-lg p-2">
+                                        <p className="text-gray-400 text-[10px] uppercase">Sets</p>
+                                        <p className="text-white font-bold">{exercise.sets}</p>
+                                      </div>
+                                      <div className="bg-carbon-800 rounded-lg p-2">
+                                        <p className="text-gray-400 text-[10px] uppercase">Reps</p>
+                                        <p className="text-white font-bold">{exercise.reps}</p>
+                                      </div>
+                                      <div className="bg-carbon-800 rounded-lg p-2">
+                                        <p className="text-gray-400 text-[10px] uppercase">Tempo</p>
+                                        <p className="text-white font-bold">{exercise.tempo}</p>
+                                      </div>
+                                      <div className="bg-carbon-800 rounded-lg p-2">
+                                        <p className="text-gray-400 text-[10px] uppercase">Rest</p>
+                                        <p className="text-white font-bold">{exercise.rest}s</p>
+                                      </div>
+                                    </div>
+                                    <div className="mt-2 flex flex-wrap gap-1">
+                                      {exercise.muscleGroups.map((muscle) => (
+                                        <span
+                                          key={muscle}
+                                          className="text-[10px] px-2 py-0.5 bg-gold-500/10 text-gold-400 rounded-full"
+                                        >
+                                          {muscle}
+                                        </span>
+                                      ))}
+                                    </div>
                                   </div>
-                                  <div className="grid grid-cols-4 gap-2 text-center">
-                                    <div className="bg-carbon-800 rounded-lg p-2">
-                                      <p className="text-gray-400 text-[10px] uppercase">Sets</p>
-                                      <p className="text-white font-bold">{exercise.sets}</p>
-                                    </div>
-                                    <div className="bg-carbon-800 rounded-lg p-2">
-                                      <p className="text-gray-400 text-[10px] uppercase">Reps</p>
-                                      <p className="text-white font-bold">{exercise.reps}</p>
-                                    </div>
-                                    <div className="bg-carbon-800 rounded-lg p-2">
-                                      <p className="text-gray-400 text-[10px] uppercase">Tempo</p>
-                                      <p className="text-white font-bold">{exercise.tempo}</p>
-                                    </div>
-                                    <div className="bg-carbon-800 rounded-lg p-2">
-                                      <p className="text-gray-400 text-[10px] uppercase">Rest</p>
-                                      <p className="text-white font-bold">{exercise.rest}s</p>
-                                    </div>
-                                  </div>
-                                  <div className="mt-2 flex flex-wrap gap-1">
-                                    {exercise.muscleGroups.map((muscle) => (
-                                      <span
-                                        key={muscle}
-                                        className="text-[10px] px-2 py-0.5 bg-gold-500/10 text-gold-400 rounded-full"
-                                      >
-                                        {muscle}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                              ))}
+                                );
+                              })}
                             </div>
                           )}
                         </div>
@@ -348,6 +501,22 @@ const AthleteProgram = ({ onStartWorkout }) => {
           </StaggerContainer>
         </div>
       </div>
+
+      {/* Modals */}
+      {showInfoModal && (
+        <ProgramExerciseInfoModal
+          exercise={showInfoModal}
+          onClose={() => setShowInfoModal(null)}
+          onShowVideo={handleShowVideo}
+        />
+      )}
+
+      {showVideoId && (
+        <ProgramVideoModal
+          videoId={showVideoId}
+          onClose={() => setShowVideoId(null)}
+        />
+      )}
     </PageTransition>
   );
 };
