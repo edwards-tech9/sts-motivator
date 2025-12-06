@@ -313,6 +313,7 @@ const ClientDetailView = ({ client, onBack, onMessage, onShowOptions }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [showLocalMessage, setShowLocalMessage] = useState(false);
   const [showLocalOptions, setShowLocalOptions] = useState(false);
+  const [showAssignProgram, setShowAssignProgram] = useState(false);
   const [pushSuccess, setPushSuccess] = useState(false);
   const [coachingTipsExpanded, setCoachingTipsExpanded] = useState(true);
 
@@ -620,7 +621,7 @@ const ClientDetailView = ({ client, onBack, onMessage, onShowOptions }) => {
         </div>
 
         <button
-          onClick={() => setShowLocalOptions(true)}
+          onClick={() => setShowAssignProgram(true)}
           className="w-full bg-gold-gradient text-carbon-900 font-bold py-4 rounded-2xl text-lg hover:scale-[1.02] transition-transform shadow-lg shadow-gold-500/30 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-offset-2 focus:ring-offset-carbon-900"
         >
           Assign New Program
@@ -628,6 +629,18 @@ const ClientDetailView = ({ client, onBack, onMessage, onShowOptions }) => {
         </>
         )}
       </div>
+
+      {/* Assign Program Modal */}
+      {showAssignProgram && (
+        <AssignProgramModal
+          client={client}
+          onClose={() => setShowAssignProgram(false)}
+          onAssign={(program) => {
+            // In a real app, this would update the client's program
+            alert(`${program.name} assigned to ${client.name}!`);
+          }}
+        />
+      )}
     </div>
   );
 };
@@ -1265,10 +1278,38 @@ const CoachDashboard = () => {
           <h2 className="text-white font-bold mb-4">RECENT ACTIVITY</h2>
           <div className="space-y-3">
             {[
-              { icon: '🏋️', name: 'John D.', clientId: 1, action: 'completed "Week 3 Day 2"', time: '2 min ago' },
-              { icon: '🎥', name: 'Emma S.', clientId: 2, action: 'uploaded form check (Squat)', time: '15 min ago' },
-              { icon: '💬', name: 'Alex R.', clientId: null, action: 'sent a message', time: '1 hour ago' },
-              { icon: '✅', name: 'Chris P.', clientId: null, action: 'logged new 1RM (Deadlift)', time: '2 hours ago' },
+              {
+                icon: '🏋️',
+                name: 'John D.',
+                clientId: 1,
+                actionText: 'completed',
+                actionLink: { type: 'workout', label: 'Week 3 Day 2' },
+                time: '2 min ago'
+              },
+              {
+                icon: '🎥',
+                name: 'Emma S.',
+                clientId: 2,
+                actionText: 'uploaded form check',
+                actionLink: { type: 'exercise', label: 'Squat' },
+                time: '15 min ago'
+              },
+              {
+                icon: '💬',
+                name: 'Alex R.',
+                clientId: null,
+                actionText: null,
+                actionLink: { type: 'message', label: 'sent a message' },
+                time: '1 hour ago'
+              },
+              {
+                icon: '✅',
+                name: 'Chris P.',
+                clientId: null,
+                actionText: 'logged new 1RM',
+                actionLink: { type: 'exercise', label: 'Deadlift' },
+                time: '2 hours ago'
+              },
             ].map((item, i) => (
               <div
                 key={i}
@@ -1286,7 +1327,24 @@ const CoachDashboard = () => {
                     >
                       {item.name}
                     </button>
-                    {' '}{item.action}
+                    {' '}{item.actionText && <span>{item.actionText} </span>}
+                    <button
+                      onClick={() => {
+                        // Handle action link click
+                        if (item.actionLink.type === 'message') {
+                          const client = clients.find(c => c.name.includes(item.name.split(' ')[0]));
+                          if (client) setMessageClient(client);
+                        } else if (item.actionLink.type === 'exercise') {
+                          alert(`View ${item.actionLink.label} details - coming soon!`);
+                        } else if (item.actionLink.type === 'workout') {
+                          const client = clients.find(c => c.id === item.clientId);
+                          if (client) setSelectedClient(client);
+                        }
+                      }}
+                      className="text-gold-400 hover:text-gold-300 transition-colors hover:underline"
+                    >
+                      {item.actionLink.type === 'message' ? item.actionLink.label : `"${item.actionLink.label}"`}
+                    </button>
                   </p>
                 </div>
                 <p className="text-gray-500 text-xs">{item.time}</p>

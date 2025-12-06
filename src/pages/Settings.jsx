@@ -401,7 +401,7 @@ const HelpModal = ({ onClose }) => {
 
           {/* App Info */}
           <div className="pt-4 border-t border-carbon-700 text-center space-y-1">
-            <p className="text-gray-500 text-sm">STS M0TIV8R v1.4.0</p>
+            <p className="text-gray-500 text-sm">STS M0TIV8R v2.0.0</p>
             <p className="text-gray-600 text-xs">© 2025 Scullin Training Systems</p>
             <p className="text-gray-700 text-[10px] uppercase tracking-widest">Powered by Donkey Butter</p>
           </div>
@@ -851,7 +851,7 @@ const Settings = ({ userRole, onLogout }) => {
           </SlideIn>
 
           <div className="text-center space-y-1">
-            <p className="text-gray-500 text-sm">STS M0TIV8R v1.4.0</p>
+            <p className="text-gray-500 text-sm">STS M0TIV8R v2.0.0</p>
             <p className="text-gray-600 text-xs uppercase tracking-widest">Powered by Donkey Butter</p>
           </div>
         </div>
