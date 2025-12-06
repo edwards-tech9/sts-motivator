@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { Minus, Plus, Camera } from 'lucide-react';
+import useEscapeKey from '../../hooks/useEscapeKey';
 
 const SetLoggingModal = ({ exercise, setNumber, totalSets, onLog, onCancel, techMode }) => {
   const [weight, setWeight] = useState(exercise.lastWeight);
   const [reps, setReps] = useState(exercise.lastReps[setNumber - 1] || 10);
   const [rpe, setRpe] = useState(7);
+
+  // Allow escape key to cancel
+  useEscapeKey(onCancel);
 
   return (
     <div
