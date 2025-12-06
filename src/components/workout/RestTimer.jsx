@@ -1,11 +1,43 @@
-import { useState, useEffect } from 'react';
-import { Play, Pause } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Play, Pause, Users, Flame, ChevronUp, ChevronDown } from 'lucide-react';
+import { getSocialSettings } from '../settings/SocialSettings';
+
+// Simulated live users working out
+const MOCK_LIVE_USERS = [
+  { id: 1, name: 'Mike C.', avatar: 'MC', color: 'from-blue-500 to-blue-600', action: 'Just hit 315 lb squat!', time: '2m ago' },
+  { id: 2, name: 'Sarah J.', avatar: 'SJ', color: 'from-pink-500 to-pink-600', action: 'Finished leg day!', time: '5m ago' },
+  { id: 3, name: 'Emma D.', avatar: 'ED', color: 'from-purple-500 to-purple-600', action: 'New PR on bench press!', time: '8m ago' },
+  { id: 4, name: 'Jake T.', avatar: 'JT', color: 'from-green-500 to-green-600', action: 'Set 4 of 5 complete', time: '1m ago' },
+  { id: 5, name: 'Maria L.', avatar: 'ML', color: 'from-orange-500 to-orange-600', action: 'Going for a PR attempt...', time: 'now' },
+];
 
 const RestTimer = ({ duration, onComplete, onSkip }) => {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isPaused, setIsPaused] = useState(false);
+  const [showLiveFeed, setShowLiveFeed] = useState(true);
+  const [encouragedUsers, setEncouragedUsers] = useState([]);
+  const [liveUsers, setLiveUsers] = useState(MOCK_LIVE_USERS.slice(0, 3));
+
+  // Memoize social settings to avoid re-computation on every render
+  const socialSettings = useMemo(() => getSocialSettings(), []);
   const circumference = 2 * Math.PI * 120;
   const progress = ((duration - timeLeft) / duration) * circumference;
+
+  // Simulate live activity updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Randomly update live users
+      const shuffled = [...MOCK_LIVE_USERS].sort(() => 0.5 - Math.random());
+      setLiveUsers(shuffled.slice(0, 3 + Math.floor(Math.random() * 2)));
+    }, 8000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleEncourage = (userId) => {
+    if (!encouragedUsers.includes(userId)) {
+      setEncouragedUsers([...encouragedUsers, userId]);
+    }
+  };
 
   useEffect(() => {
     if (timeLeft <= 0) {
@@ -30,7 +62,7 @@ const RestTimer = ({ duration, onComplete, onSkip }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-gradient-to-b from-carbon-900 to-slate-950 flex flex-col items-center justify-center z-40"
+      className="fixed inset-0 bg-gradient-to-b from-carbon-900 to-slate-950 flex flex-col items-center justify-center z-50"
       role="dialog"
       aria-label="Rest timer"
     >
@@ -96,6 +128,66 @@ const RestTimer = ({ duration, onComplete, onSkip }) => {
       >
         SKIP REST
       </button>
+
+      {/* Live Activity Feed - Shown during rest */}
+      {socialSettings.showLiveActivity && socialSettings.socialVisibility !== 'private' && (
+        <div className="absolute bottom-0 left-0 right-0 bg-carbon-900/95 backdrop-blur-lg border-t border-carbon-700">
+          <button
+            onClick={() => setShowLiveFeed(!showLiveFeed)}
+            className="w-full flex items-center justify-between p-3 hover:bg-carbon-800/50 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <Users className="text-gold-400" size={18} />
+              <span className="text-white font-semibold text-sm">Live Activity</span>
+              <span className="text-gray-500 text-xs">({liveUsers.length} working out)</span>
+            </div>
+            {showLiveFeed ? <ChevronDown size={18} className="text-gray-400" /> : <ChevronUp size={18} className="text-gray-400" />}
+          </button>
+
+          {showLiveFeed && (
+            <div className="px-4 pb-4 space-y-2 max-h-48 overflow-y-auto">
+              {liveUsers.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex items-center gap-3 p-3 bg-carbon-800/50 rounded-xl animate-slide-in"
+                >
+                  <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${user.color} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
+                    {user.avatar}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-semibold text-sm">{user.name}</p>
+                    <p className="text-gray-400 text-xs truncate">{user.action}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500 text-xs">{user.time}</span>
+                    <button
+                      onClick={() => handleEncourage(user.id)}
+                      disabled={encouragedUsers.includes(user.id)}
+                      className={`p-2 rounded-xl transition-all ${
+                        encouragedUsers.includes(user.id)
+                          ? 'bg-gold-500/20 text-gold-400'
+                          : 'bg-carbon-700 text-gray-400 hover:bg-gold-500/20 hover:text-gold-400 active:scale-95'
+                      }`}
+                      aria-label={`Send encouragement to ${user.name}`}
+                    >
+                      <Flame size={16} className={encouragedUsers.includes(user.id) ? 'animate-pulse' : ''} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {encouragedUsers.length > 0 && (
+                <div className="text-center py-2">
+                  <span className="text-gold-400 text-xs font-semibold">
+                    🔥 You've sent {encouragedUsers.length} encouragement{encouragedUsers.length > 1 ? 's' : ''}!
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

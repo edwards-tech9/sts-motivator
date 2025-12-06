@@ -1,10 +1,24 @@
-import { Play, Trophy, BarChart3, MessageSquare, Dumbbell, Target, TrendingUp } from 'lucide-react';
+import { useState } from 'react';
+import { Play, Trophy, BarChart3, MessageSquare, Dumbbell, Target, TrendingUp, Award, Flame, Gift, Users } from 'lucide-react';
 import StreakDisplay from '../components/dashboard/StreakDisplay';
 import { PageTransition, SlideIn, ScaleIn, AnimatedButton, StaggerContainer } from '../components/ui/AnimatedComponents';
+import XPDisplay from '../components/gamification/XPDisplay';
+import WeeklyChallenge from '../components/gamification/WeeklyChallenge';
+import BadgeGrid from '../components/gamification/BadgeGrid';
+import DailyQuests from '../components/gamification/DailyQuests';
+import Leaderboard from '../components/gamification/Leaderboard';
+import BodyMetricsTracker from '../components/tracking/BodyMetricsTracker';
+import { getGamificationState } from '../services/gamificationService';
 
-const AthleteHome = ({ onStartWorkout, userName = 'John' }) => (
+const AthleteHome = ({ onStartWorkout, userName = 'Dadward' }) => {
+  const [showBadges, setShowBadges] = useState(false);
+  const [showQuests, setShowQuests] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const gamificationState = getGamificationState();
+
+  return (
   <PageTransition>
-    <div className="min-h-screen bg-gradient-to-b from-carbon-900 via-carbon-950 to-black pb-24">
+    <div className="min-h-screen pb-24">
       <header className="p-6">
         <SlideIn direction="down" delay={0}>
           <div className="flex items-center justify-between mb-6">
@@ -24,11 +38,21 @@ const AthleteHome = ({ onStartWorkout, userName = 'John' }) => (
           </div>
         </SlideIn>
 
+        {/* XP Display */}
+        <SlideIn delay={50}>
+          <div className="mt-4">
+            <XPDisplay compact />
+          </div>
+        </SlideIn>
+
         <SlideIn delay={100}>
-          <StreakDisplay streak={8} weeklyTarget={4} weeklyCompleted={2} />
+          <div className="mt-4">
+            <StreakDisplay streak={gamificationState.streakDays || 8} weeklyTarget={4} weeklyCompleted={gamificationState.stats?.workoutsThisWeek || 2} />
+          </div>
         </SlideIn>
 
         <ScaleIn delay={200}>
+          <div className="mt-6">
           <div className="bg-gradient-to-br from-carbon-800 to-carbon-900 rounded-3xl p-6 border border-gold-500/20 shadow-2xl">
             <div className="flex justify-between items-start mb-4">
               <div>
@@ -71,6 +95,7 @@ const AthleteHome = ({ onStartWorkout, userName = 'John' }) => (
               <Play size={24} fill="currentColor" aria-hidden="true" />
               START WORKOUT
             </AnimatedButton>
+          </div>
           </div>
         </ScaleIn>
 
@@ -122,9 +147,96 @@ const AthleteHome = ({ onStartWorkout, userName = 'John' }) => (
             <p className="text-gray-500 text-xs mt-2">— Coach Mike, 2 days ago</p>
           </div>
         </SlideIn>
+
+        {/* Body Metrics Tracking */}
+        <SlideIn delay={410}>
+          <div className="mt-6">
+            <BodyMetricsTracker userId="demo" />
+          </div>
+        </SlideIn>
+
+        {/* Daily Quests */}
+        <SlideIn delay={425}>
+          <div className="mt-6">
+            <button
+              onClick={() => setShowQuests(!showQuests)}
+              className="w-full flex items-center justify-between bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-2xl p-4 hover:from-purple-500/20 hover:to-blue-500/20 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-400"
+            >
+              <div className="flex items-center gap-3">
+                <Gift className="text-purple-400" size={24} />
+                <div className="text-left">
+                  <p className="text-white font-bold">Daily Quests</p>
+                  <p className="text-gray-400 text-sm">Complete for bonus XP</p>
+                </div>
+              </div>
+              <span className="text-gray-400">{showQuests ? '▲' : '▼'}</span>
+            </button>
+            {showQuests && (
+              <div className="mt-3 bg-carbon-800/30 rounded-2xl p-4">
+                <DailyQuests />
+              </div>
+            )}
+          </div>
+        </SlideIn>
+
+        {/* Weekly Challenge */}
+        <SlideIn delay={450}>
+          <div className="mt-6">
+            <WeeklyChallenge />
+          </div>
+        </SlideIn>
+
+        {/* Leaderboard */}
+        <SlideIn delay={475}>
+          <div className="mt-6">
+            <button
+              onClick={() => setShowLeaderboard(!showLeaderboard)}
+              className="w-full flex items-center justify-between bg-carbon-800/50 rounded-2xl p-4 hover:bg-carbon-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gold-400"
+            >
+              <div className="flex items-center gap-3">
+                <Users className="text-orange-400" size={24} />
+                <div className="text-left">
+                  <p className="text-white font-bold">Leaderboard</p>
+                  <p className="text-gray-500 text-sm">See how you rank</p>
+                </div>
+              </div>
+              <span className="text-gray-400">{showLeaderboard ? '▲' : '▼'}</span>
+            </button>
+            {showLeaderboard && (
+              <div className="mt-3 bg-carbon-800/30 rounded-2xl p-4">
+                <Leaderboard />
+              </div>
+            )}
+          </div>
+        </SlideIn>
+
+        {/* Badges Section */}
+        <SlideIn delay={500}>
+          <div className="mt-6">
+            <button
+              onClick={() => setShowBadges(!showBadges)}
+              className="w-full flex items-center justify-between bg-carbon-800/50 rounded-2xl p-4 hover:bg-carbon-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gold-400"
+            >
+              <div className="flex items-center gap-3">
+                <Award className="text-gold-400" size={24} />
+                <div className="text-left">
+                  <p className="text-white font-bold">Achievements</p>
+                  <p className="text-gray-500 text-sm">{gamificationState.badges?.length || 0} badges earned</p>
+                </div>
+              </div>
+              <span className="text-gray-400">{showBadges ? '▲' : '▼'}</span>
+            </button>
+            {showBadges && (
+              <div className="mt-3 bg-carbon-800/30 rounded-2xl p-4">
+                <BadgeGrid />
+              </div>
+            )}
+          </div>
+        </SlideIn>
       </header>
     </div>
   </PageTransition>
-);
+  );
+};
 
 export default AthleteHome;

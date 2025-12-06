@@ -10,6 +10,11 @@ import CoachDashboard from './pages/CoachDashboard';
 import ProgramBuilder from './pages/ProgramBuilder';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
+import Chat from './pages/Chat';
+import FormChecks from './pages/FormChecks';
+import AthleteProgram from './pages/AthleteProgram';
+import LiveActivity from './pages/LiveActivity';
+import Clients from './pages/Clients';
 
 // Loading spinner component
 const LoadingScreen = () => (
@@ -47,7 +52,7 @@ const AppContent = () => {
 
   // Show login if not authenticated (and not in demo mode)
   if (!user && !demoMode) {
-    return <Login />;
+    return <Login onDemoMode={() => setDemoMode(true)} />;
   }
 
   // Determine current role
@@ -76,9 +81,24 @@ const AppContent = () => {
       return <Settings userRole={userRole} onLogout={handleLogout} />;
     }
 
+    // Live Activity page (athlete)
+    if (activeTab === 'live' && userRole === 'athlete') {
+      return <LiveActivity />;
+    }
+
     // Progress/History page (athlete)
     if (activeTab === 'progress' && userRole === 'athlete') {
       return <WorkoutHistory />;
+    }
+
+    // Chat page (athlete)
+    if (activeTab === 'chat' && userRole === 'athlete') {
+      return <Chat />;
+    }
+
+    // Program view page (athlete)
+    if (activeTab === 'program' && userRole === 'athlete') {
+      return <AthleteProgram onStartWorkout={() => setInWorkout(true)} />;
     }
 
     // Programs page (coach - Program Builder)
@@ -86,7 +106,17 @@ const AppContent = () => {
       return <ProgramBuilder />;
     }
 
-    // Coach views
+    // Form Checks page (coach)
+    if (activeTab === 'formchecks' && userRole === 'coach') {
+      return <FormChecks />;
+    }
+
+    // Clients page (coach)
+    if (activeTab === 'clients' && userRole === 'coach') {
+      return <Clients />;
+    }
+
+    // Coach views (dashboard is default)
     if (userRole === 'coach') {
       return <CoachDashboard />;
     }
@@ -105,13 +135,29 @@ const AppContent = () => {
     return (
       <AthleteHome
         onStartWorkout={() => setInWorkout(true)}
-        userName={userData?.displayName || 'Athlete'}
+        userName={userData?.displayName || 'Dadward'}
       />
     );
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-screen bg-gradient-to-b from-carbon-900 via-carbon-950 to-black text-white relative overflow-hidden">
+      {/* Massive Watermark Logo Background */}
+      <div
+        className="fixed inset-0 pointer-events-none z-[1] flex items-center justify-center"
+        aria-hidden="true"
+      >
+        <img
+          src="/logo.png"
+          alt=""
+          className="w-[120vw] max-w-none h-auto opacity-[0.06] select-none"
+          style={{
+            filter: 'grayscale(10%) brightness(1.2)',
+            transform: 'rotate(-12deg) scale(1.1)',
+          }}
+        />
+      </div>
+
       {/* Skip to main content link for accessibility */}
       <a href="#main-content" className="skip-link">
         Skip to main content
@@ -130,7 +176,7 @@ const AppContent = () => {
         </div>
       )}
 
-      <main id="main-content">
+      <main id="main-content" className="relative z-10">
         {renderContent()}
       </main>
 

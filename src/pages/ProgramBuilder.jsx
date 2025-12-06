@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { Plus, Minus, GripVertical, Trash2, Copy, Save, ChevronDown, ChevronUp, Search, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Minus, GripVertical, Trash2, Copy, Save, ChevronDown, ChevronUp, Search, X, Check, Sparkles, Wand2 } from 'lucide-react';
+import { saveProgram, getPrograms } from '../services/localStorage';
+import { generateAIProgram } from '../services/aiProgramService';
 
 // Exercise library
 const exerciseLibrary = [
@@ -26,6 +28,7 @@ const exerciseLibrary = [
 ];
 
 const ProgramBuilder = () => {
+  const [programId, setProgramId] = useState(null);
   const [programName, setProgramName] = useState('New Strength Program');
   const [weeks, setWeeks] = useState(4);
   const [days, setDays] = useState([
@@ -53,6 +56,14 @@ const ProgramBuilder = () => {
   const [showExerciseLibrary, setShowExerciseLibrary] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDayForExercise, setSelectedDayForExercise] = useState(null);
+  const [saveStatus, setSaveStatus] = useState(null); // null, 'saving', 'saved', 'error'
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiConfig, setAiConfig] = useState({
+    goal: 'strength',
+    level: 'intermediate',
+    daysPerWeek: 4,
+  });
 
   const getExerciseName = (exerciseId) => {
     return exerciseLibrary.find((e) => e.id === exerciseId)?.name || 'Unknown';
@@ -124,27 +135,146 @@ const ProgramBuilder = () => {
       e.muscleGroups.some((mg) => mg.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  // Handle auto program generation
+  const handleAutoGenerate = () => {
+    setAiGenerating(true);
+
+    // Process and generate program
+    setTimeout(() => {
+      const generatedProgram = generateAIProgram('demo', null, {
+        goal: aiConfig.goal,
+        level: aiConfig.level,
+        daysPerWeek: aiConfig.daysPerWeek,
+        weeks: weeks,
+      });
+
+      // Map generated program to builder format
+      if (generatedProgram) {
+        setProgramName(generatedProgram.name);
+        setWeeks(generatedProgram.weeks);
+
+        const mappedDays = generatedProgram.days.map((day, i) => ({
+          id: Date.now() + i,
+          name: day.name,
+          exercises: day.exercises.map((ex, j) => {
+            // Find exercise ID from library or use a placeholder
+            const libraryExercise = exerciseLibrary.find(
+              e => e.name.toLowerCase() === ex.name.toLowerCase()
+            );
+            return {
+              id: Date.now() + i * 100 + j,
+              exerciseId: libraryExercise?.id || 1,
+              exerciseName: ex.name, // Keep name for display
+              sets: ex.sets,
+              reps: ex.reps,
+              tempo: ex.tempo,
+              rest: ex.rest,
+            };
+          }),
+        }));
+
+        setDays(mappedDays);
+        setExpandedDay(0);
+      }
+
+      setAiGenerating(false);
+      setShowAIGenerator(false);
+    }, 1000);
+  };
+
   const handleSave = () => {
-    // TODO: Save to Firestore
-    console.log('Saving program:', { programName, weeks, days });
-    alert('Program saved! (Demo mode - will save to Firebase when connected)');
+    setSaveStatus('saving');
+
+    try {
+      // Build the program object with exercise names resolved
+      const programData = {
+        id: programId, // Will be null for new programs, assigned by saveProgram
+        name: programName,
+        weeks,
+        days: days.map(day => ({
+          name: day.name,
+          exercises: day.exercises.map(ex => ({
+            name: getExerciseName(ex.exerciseId),
+            exerciseId: ex.exerciseId,
+            sets: ex.sets,
+            reps: ex.reps,
+            tempo: ex.tempo,
+            rest: ex.rest,
+          })),
+        })),
+        coachId: 'demo_coach', // In production, get from auth context
+        updatedAt: new Date().toISOString(),
+      };
+
+      const savedProgram = saveProgram(programData);
+
+      // Store the ID for future saves (updates)
+      if (!programId && savedProgram.id) {
+        setProgramId(savedProgram.id);
+      }
+
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus(null), 2000);
+    } catch (error) {
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus(null), 3000);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-carbon-900 via-carbon-950 to-black pb-24">
+    <div className="min-h-screen pb-24">
       <header className="sticky top-0 z-30 bg-carbon-900/90 backdrop-blur-lg border-b border-slate-800">
         <div className="flex items-center justify-between p-4">
-          <div>
-            <p className="text-gold-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
-            <p className="text-gray-400 text-xs">PROGRAM BUILDER</p>
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="STS" className="w-10 h-10 object-contain" />
+            <div>
+              <p className="text-gold-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
+              <p className="text-gray-400 text-xs">PROGRAM BUILDER</p>
+            </div>
           </div>
-          <button
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowAIGenerator(true)}
+              className="flex items-center gap-2 px-3 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-xl font-semibold text-sm transition-colors"
+              title="Auto-generate program"
+            >
+              <Sparkles size={16} />
+              <span className="hidden sm:inline">Auto-Fill</span>
+            </button>
+            <button
             onClick={handleSave}
-            className="flex items-center gap-2 bg-gold-gradient text-carbon-900 px-4 py-2 rounded-xl font-semibold"
+            disabled={saveStatus === 'saving'}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all ${
+              saveStatus === 'saved'
+                ? 'bg-green-500 text-white'
+                : saveStatus === 'error'
+                ? 'bg-red-500 text-white'
+                : 'bg-gold-gradient text-carbon-900'
+            } disabled:opacity-70`}
           >
-            <Save size={18} />
-            Save
+            {saveStatus === 'saving' ? (
+              <>
+                <div className="w-4 h-4 border-2 border-carbon-900 border-t-transparent rounded-full animate-spin" />
+                Saving...
+              </>
+            ) : saveStatus === 'saved' ? (
+              <>
+                <Check size={18} />
+                Saved!
+              </>
+            ) : saveStatus === 'error' ? (
+              <>
+                <X size={18} />
+                Error
+              </>
+            ) : (
+              <>
+                <Save size={18} />
+                Save
+              </>
+            )}
           </button>
+          </div>
         </div>
       </header>
 
@@ -365,6 +495,104 @@ const ProgramBuilder = () => {
                 </button>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Program Generator Modal */}
+      {showAIGenerator && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+          <div className="bg-carbon-900 rounded-3xl w-full max-w-md overflow-hidden">
+            <div className="p-6 border-b border-carbon-700 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                  <Wand2 className="text-purple-400" size={20} />
+                </div>
+                <div>
+                  <p className="text-white font-semibold">Quick Program Builder</p>
+                  <p className="text-gray-500 text-sm">Configure and generate</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAIGenerator(false)}
+                className="p-2 hover:bg-carbon-800 rounded-xl"
+              >
+                <X className="text-gray-400" size={20} />
+              </button>
+            </div>
+
+            {aiGenerating ? (
+              <div className="p-12 text-center">
+                <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="text-purple-400 animate-pulse" size={28} />
+                </div>
+                <p className="text-white font-semibold text-lg">Building Program...</p>
+                <p className="text-gray-400 text-sm mt-1">Analyzing patterns and building exercises</p>
+              </div>
+            ) : (
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-gray-400 text-sm mb-2">Training Goal</label>
+                  <select
+                    value={aiConfig.goal}
+                    onChange={(e) => setAiConfig(prev => ({ ...prev, goal: e.target.value }))}
+                    className="w-full bg-carbon-800 border border-carbon-700 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-purple-500/50"
+                  >
+                    <option value="strength">Strength</option>
+                    <option value="hypertrophy">Muscle Building</option>
+                    <option value="fatLoss">Fat Loss</option>
+                    <option value="athletic">Athletic Performance</option>
+                    <option value="general">General Fitness</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-gray-400 text-sm mb-2">Experience Level</label>
+                  <select
+                    value={aiConfig.level}
+                    onChange={(e) => setAiConfig(prev => ({ ...prev, level: e.target.value }))}
+                    className="w-full bg-carbon-800 border border-carbon-700 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-purple-500/50"
+                  >
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-gray-400 text-sm mb-2">Days Per Week</label>
+                  <div className="flex items-center gap-3">
+                    {[2, 3, 4, 5, 6].map(num => (
+                      <button
+                        key={num}
+                        onClick={() => setAiConfig(prev => ({ ...prev, daysPerWeek: num }))}
+                        className={`flex-1 py-3 rounded-xl font-semibold transition-colors ${
+                          aiConfig.daysPerWeek === num
+                            ? 'bg-purple-500/30 text-purple-400 border border-purple-500/30'
+                            : 'bg-carbon-800 text-gray-400 hover:bg-carbon-700'
+                        }`}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <p className="text-gray-500 text-xs mb-4">
+                    This will replace your current program with an auto-generated template.
+                    You can edit it after generation.
+                  </p>
+                  <button
+                    onClick={handleAutoGenerate}
+                    className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold py-3 rounded-xl hover:scale-[1.02] transition-transform flex items-center justify-center gap-2"
+                  >
+                    <Sparkles size={18} />
+                    Generate Program
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

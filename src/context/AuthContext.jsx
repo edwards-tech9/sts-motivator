@@ -52,8 +52,8 @@ export const AuthProvider = ({ children }) => {
 
           setLoading(false);
         });
-      } catch (err) {
-        console.error('Auth setup error:', err);
+      } catch {
+        // Auth setup failed, continue without auth
         setLoading(false);
       }
     };

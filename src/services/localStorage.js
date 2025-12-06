@@ -8,6 +8,9 @@ const STORAGE_KEYS = {
   ATHLETES: 'sts_athletes',
   SETTINGS: 'sts_settings',
   PRS: 'sts_prs',
+  MESSAGES: 'sts_messages',
+  EXERCISE_VIDEOS: 'sts_exercise_videos',
+  PROFILE: 'sts_profile',
 };
 
 // Helper to get/set JSON from localStorage
@@ -302,6 +305,52 @@ export const initializeDemoData = () => {
   ];
 
   sampleAthletes.forEach(saveAthlete);
+};
+
+// Messages
+export const getMessages = () => getItem(STORAGE_KEYS.MESSAGES, []);
+
+export const saveMessage = (messages) => setItem(STORAGE_KEYS.MESSAGES, messages);
+
+export const addMessage = (message) => {
+  const messages = getMessages();
+  message.id = message.id || `msg_${Date.now()}`;
+  message.timestamp = message.timestamp || new Date().toISOString();
+  messages.push(message);
+  setItem(STORAGE_KEYS.MESSAGES, messages);
+  return message;
+};
+
+// Profile
+export const getProfile = () => getItem(STORAGE_KEYS.PROFILE, {
+  name: '',
+  email: '',
+  avatar: '',
+  height: '',
+  weight: '',
+  birthdate: '',
+  goals: [],
+  experience: 'beginner',
+});
+
+export const saveProfile = (profile) => setItem(STORAGE_KEYS.PROFILE, profile);
+
+// Exercise Video Overrides (for coach customization)
+export const getExerciseVideos = () => getItem(STORAGE_KEYS.EXERCISE_VIDEOS, {});
+
+export const saveExerciseVideo = (exerciseName, videoData) => {
+  const videos = getExerciseVideos();
+  videos[exerciseName] = {
+    ...videoData,
+    updatedAt: new Date().toISOString(),
+  };
+  setItem(STORAGE_KEYS.EXERCISE_VIDEOS, videos);
+  return videos[exerciseName];
+};
+
+export const getExerciseVideo = (exerciseName) => {
+  const videos = getExerciseVideos();
+  return videos[exerciseName] || null;
 };
 
 // Call initialize on import

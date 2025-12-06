@@ -8,7 +8,7 @@ const SetLoggingModal = ({ exercise, setNumber, totalSets, onLog, onCancel, tech
 
   return (
     <div
-      className="fixed inset-0 bg-black/95 flex flex-col z-40 overflow-auto"
+      className="fixed inset-0 bg-black/95 flex flex-col z-50 overflow-auto"
       role="dialog"
       aria-labelledby="set-logging-title"
     >
@@ -112,11 +112,14 @@ const SetLoggingModal = ({ exercise, setNumber, totalSets, onLog, onCancel, tech
         )}
 
         <button
-          className="w-full bg-carbon-800 hover:bg-carbon-700 text-gray-300 py-4 rounded-2xl flex items-center justify-center gap-3 mb-4 transition-colors focus:outline-none focus:ring-2 focus:ring-gold-400"
-          aria-label="Record form check video"
+          disabled
+          className="w-full bg-carbon-800 text-gray-500 py-4 rounded-2xl flex items-center justify-center gap-3 mb-4 cursor-not-allowed opacity-60"
+          aria-label="Record form check video (coming soon)"
+          title="Form check recording coming soon"
         >
           <Camera size={20} aria-hidden="true" />
           Record Form Check
+          <span className="text-xs bg-carbon-700 px-2 py-0.5 rounded-full">Soon</span>
         </button>
       </div>
 

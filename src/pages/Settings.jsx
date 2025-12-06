@@ -1,11 +1,477 @@
-import { Sun, Moon, Bell, Lock, User, HelpCircle, LogOut, ChevronRight, Download, Wifi, WifiOff } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import { useState, useEffect } from 'react';
+import { Bell, Lock, User, HelpCircle, LogOut, ChevronRight, Download, Wifi, WifiOff, X, Mail, Shield, Eye, EyeOff, ExternalLink, MessageCircle, Users, Flame } from 'lucide-react';
 import { usePWA } from '../hooks/usePWA';
 import { PageTransition, SlideIn, AnimatedButton } from '../components/ui/AnimatedComponents';
+import { getProfile, saveProfile } from '../services/localStorage';
+import SocialSettings from '../components/settings/SocialSettings';
+
+// Profile Modal Component
+const ProfileModal = ({ onClose }) => {
+  const [profile, setProfile] = useState(getProfile());
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => {
+    saveProfile(profile);
+    setSaved(true);
+    setTimeout(() => {
+      setSaved(false);
+      onClose();
+    }, 1500);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+      <div className="bg-carbon-800 rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-carbon-800 p-4 border-b border-carbon-700 flex items-center justify-between">
+          <h2 className="text-white text-xl font-bold">Edit Profile</h2>
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-white">
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          {/* Avatar */}
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <div className="w-24 h-24 bg-gradient-to-br from-gold-500 to-gold-300 rounded-full flex items-center justify-center text-carbon-900 text-3xl font-bold">
+                {profile.name ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+              </div>
+              <button className="absolute bottom-0 right-0 w-8 h-8 bg-gold-500 rounded-full flex items-center justify-center text-carbon-900">
+                <User size={16} />
+              </button>
+            </div>
+          </div>
+
+          {/* Name */}
+          <div>
+            <label className="block text-gray-400 text-sm mb-2">Full Name</label>
+            <input
+              type="text"
+              value={profile.name}
+              onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+              placeholder="Enter your name"
+              className="w-full bg-carbon-900 text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-400"
+            />
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="block text-gray-400 text-sm mb-2">Email</label>
+            <input
+              type="email"
+              value={profile.email}
+              onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+              placeholder="your@email.com"
+              className="w-full bg-carbon-900 text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-400"
+            />
+          </div>
+
+          {/* Physical Stats */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-gray-400 text-sm mb-2">Height</label>
+              <input
+                type="text"
+                value={profile.height}
+                onChange={(e) => setProfile({ ...profile, height: e.target.value })}
+                placeholder="5'10&quot;"
+                className="w-full bg-carbon-900 text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-400"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-400 text-sm mb-2">Weight</label>
+              <input
+                type="text"
+                value={profile.weight}
+                onChange={(e) => setProfile({ ...profile, weight: e.target.value })}
+                placeholder="180 lbs"
+                className="w-full bg-carbon-900 text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-400"
+              />
+            </div>
+          </div>
+
+          {/* Experience Level */}
+          <div>
+            <label className="block text-gray-400 text-sm mb-2">Experience Level</label>
+            <div className="grid grid-cols-3 gap-2">
+              {['beginner', 'intermediate', 'advanced'].map((level) => (
+                <button
+                  key={level}
+                  onClick={() => setProfile({ ...profile, experience: level })}
+                  className={`py-3 rounded-xl text-sm font-semibold capitalize transition-colors ${
+                    profile.experience === level
+                      ? 'bg-gold-gradient text-carbon-900'
+                      : 'bg-carbon-900 text-gray-400 hover:bg-carbon-700'
+                  }`}
+                >
+                  {level}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Save Button */}
+          <button
+            onClick={handleSave}
+            className={`w-full py-4 rounded-xl font-bold transition-all ${
+              saved
+                ? 'bg-green-500 text-white'
+                : 'bg-gold-gradient text-carbon-900 hover:scale-[1.02]'
+            }`}
+          >
+            {saved ? '✓ Saved!' : 'Save Changes'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Privacy & Security Modal
+const PrivacyModal = ({ onClose, onDeleteAccount }) => {
+  const [settings, setSettings] = useState({
+    profileVisibility: 'coach-only',
+    shareProgress: true,
+    dataExport: false,
+  });
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [exportStatus, setExportStatus] = useState(null);
+
+  const handleExportData = () => {
+    try {
+      // Collect all localStorage data
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        profile: localStorage.getItem('sts_profile'),
+        workouts: localStorage.getItem('sts_workouts'),
+        programs: localStorage.getItem('sts_programs'),
+        prs: localStorage.getItem('sts_prs'),
+        settings: localStorage.getItem('sts_settings'),
+        messages: localStorage.getItem('sts_messages'),
+      };
+
+      // Parse JSON strings to objects for cleaner export
+      Object.keys(exportData).forEach(key => {
+        if (exportData[key] && key !== 'exportedAt') {
+          try {
+            exportData[key] = JSON.parse(exportData[key]);
+          } catch {
+            // Keep as string if not valid JSON
+          }
+        }
+      });
+
+      // Create and download file
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sts-motivator-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setExportStatus('success');
+      setTimeout(() => setExportStatus(null), 3000);
+    } catch {
+      setExportStatus('error');
+      setTimeout(() => setExportStatus(null), 3000);
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    if (deleteConfirmText.toLowerCase() === 'delete') {
+      // Clear all localStorage data
+      const keysToDelete = [
+        'sts_user', 'sts_workouts', 'sts_programs', 'sts_athletes',
+        'sts_settings', 'sts_prs', 'sts_messages', 'sts_exercise_videos', 'sts_profile'
+      ];
+      keysToDelete.forEach(key => localStorage.removeItem(key));
+
+      // Call the logout function passed from parent
+      if (onDeleteAccount) {
+        onDeleteAccount();
+      }
+      onClose();
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+      <div className="bg-carbon-800 rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-carbon-800 p-4 border-b border-carbon-700 flex items-center justify-between">
+          <h2 className="text-white text-xl font-bold">Privacy & Security</h2>
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-white">
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {/* Profile Visibility */}
+          <div>
+            <h3 className="text-white font-semibold mb-3">Profile Visibility</h3>
+            <div className="space-y-2">
+              {[
+                { value: 'public', label: 'Public', desc: 'Anyone can see your profile' },
+                { value: 'coach-only', label: 'Coach Only', desc: 'Only your coach can see your data' },
+                { value: 'private', label: 'Private', desc: 'Your profile is completely private' },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setSettings({ ...settings, profileVisibility: option.value })}
+                  className={`w-full p-4 rounded-xl text-left transition-colors ${
+                    settings.profileVisibility === option.value
+                      ? 'bg-gold-500/20 border border-gold-500/30'
+                      : 'bg-carbon-900 hover:bg-carbon-700'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-white font-medium">{option.label}</p>
+                      <p className="text-gray-500 text-sm">{option.desc}</p>
+                    </div>
+                    {settings.profileVisibility === option.value && (
+                      <div className="w-5 h-5 bg-gold-500 rounded-full flex items-center justify-center">
+                        <span className="text-carbon-900 text-xs">✓</span>
+                      </div>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Toggles */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white font-medium">Share Progress with Coach</p>
+                <p className="text-gray-500 text-sm">Allow coach to see your workout data</p>
+              </div>
+              <button
+                onClick={() => setSettings({ ...settings, shareProgress: !settings.shareProgress })}
+                className={`w-12 h-7 rounded-full p-1 transition-colors ${
+                  settings.shareProgress ? 'bg-gold-500' : 'bg-carbon-600'
+                }`}
+              >
+                <div className={`w-5 h-5 bg-white rounded-full transition-transform ${
+                  settings.shareProgress ? 'translate-x-5' : ''
+                }`} />
+              </button>
+            </div>
+          </div>
+
+          {/* Data Export */}
+          <div className="pt-4 border-t border-carbon-700">
+            <h3 className="text-white font-semibold mb-3">Your Data</h3>
+            <button
+              onClick={handleExportData}
+              className="w-full bg-carbon-900 text-white p-4 rounded-xl flex items-center justify-between hover:bg-carbon-700 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Download size={20} className="text-gray-400" />
+                <span>Export All Data</span>
+              </div>
+              {exportStatus === 'success' ? (
+                <span className="text-green-400 text-sm">✓ Downloaded!</span>
+              ) : exportStatus === 'error' ? (
+                <span className="text-red-400 text-sm">Export failed</span>
+              ) : (
+                <ChevronRight className="text-gray-500" size={20} />
+              )}
+            </button>
+
+            {!showDeleteConfirm ? (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="w-full bg-red-500/10 text-red-400 p-4 rounded-xl flex items-center justify-between mt-2 hover:bg-red-500/20 transition-colors"
+              >
+                <span>Delete Account</span>
+                <ChevronRight className="text-red-400" size={20} />
+              </button>
+            ) : (
+              <div className="mt-2 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+                <p className="text-red-400 text-sm mb-3">
+                  This will permanently delete all your data. Type "delete" to confirm:
+                </p>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  placeholder="Type 'delete' to confirm"
+                  className="w-full bg-carbon-900 text-white px-4 py-2 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setShowDeleteConfirm(false);
+                      setDeleteConfirmText('');
+                    }}
+                    className="flex-1 py-2 bg-carbon-700 text-white rounded-lg hover:bg-carbon-600 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={deleteConfirmText.toLowerCase() !== 'delete'}
+                    className="flex-1 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Delete Forever
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Help Center Modal
+const HelpModal = ({ onClose }) => {
+  const faqs = [
+    {
+      q: 'How do I log a workout?',
+      a: 'Tap "Start Workout" on the home screen, then tap each set button to log your weight and reps.',
+    },
+    {
+      q: 'What does RPE mean?',
+      a: 'RPE (Rate of Perceived Exertion) is a 1-10 scale measuring how hard a set felt. 10 = max effort, 7-8 = moderate.',
+    },
+    {
+      q: 'How do I contact my coach?',
+      a: 'Use the Chat tab at the bottom of the screen to send messages to your coach.',
+    },
+    {
+      q: 'How are XP and levels calculated?',
+      a: 'You earn XP for completing sets, workouts, hitting PRs, and maintaining streaks. XP unlocks new levels and badges.',
+    },
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+      <div className="bg-carbon-800 rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-carbon-800 p-4 border-b border-carbon-700 flex items-center justify-between">
+          <h2 className="text-white text-xl font-bold">Help Center</h2>
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-white">
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {/* FAQs */}
+          <div>
+            <h3 className="text-gold-400 font-semibold mb-4">Frequently Asked Questions</h3>
+            <div className="space-y-4">
+              {faqs.map((faq, i) => (
+                <div key={i} className="bg-carbon-900 rounded-xl p-4">
+                  <p className="text-white font-medium mb-2">{faq.q}</p>
+                  <p className="text-gray-400 text-sm">{faq.a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Contact Options */}
+          <div className="pt-4 border-t border-carbon-700">
+            <h3 className="text-gold-400 font-semibold mb-4">Need More Help?</h3>
+            <div className="space-y-2">
+              <a
+                href="mailto:support@scullintrainingsystems.com"
+                className="w-full bg-carbon-900 text-white p-4 rounded-xl flex items-center justify-between hover:bg-carbon-700 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Mail size={20} className="text-gray-400" />
+                  <span>Email Support</span>
+                </div>
+                <ExternalLink className="text-gray-500" size={18} />
+              </a>
+              <div className="w-full bg-carbon-900 text-white p-4 rounded-xl flex items-center justify-between opacity-60 cursor-not-allowed">
+                <div className="flex items-center gap-3">
+                  <MessageCircle size={20} className="text-gray-400" />
+                  <span>Live Chat</span>
+                </div>
+                <span className="text-gray-500 text-sm">Coming Soon</span>
+              </div>
+            </div>
+          </div>
+
+          {/* App Info */}
+          <div className="pt-4 border-t border-carbon-700 text-center">
+            <p className="text-gray-500 text-sm">STS M0TIV8R v1.2.0</p>
+            <p className="text-gray-600 text-xs mt-1">© 2025 Scullin Training Systems</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Social Settings Modal
+const SocialSettingsModal = ({ onClose }) => {
+  return (
+    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+      <div className="bg-carbon-800 rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-carbon-800 p-4 border-b border-carbon-700 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gold-500/20 rounded-xl flex items-center justify-center">
+              <Users className="text-gold-400" size={20} />
+            </div>
+            <div>
+              <h2 className="text-white text-xl font-bold">Social & Live</h2>
+              <p className="text-gray-500 text-sm">Manage your social features</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-white">
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="p-6">
+          <SocialSettings onClose={onClose} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Toast notification component
+const Toast = ({ message, type = 'info', onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 3000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  const bgColor = type === 'success' ? 'bg-green-500/20 border-green-500/30 text-green-400'
+    : type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-400'
+    : 'bg-gold-500/20 border-gold-500/30 text-gold-400';
+
+  return (
+    <div
+      className={`fixed top-20 left-1/2 -translate-x-1/2 z-[60] px-6 py-3 rounded-xl border backdrop-blur-lg ${bgColor} animate-slide-up`}
+      role="alert"
+      aria-live="polite"
+    >
+      {message}
+    </div>
+  );
+};
 
 const Settings = ({ userRole, onLogout }) => {
-  const { theme, toggleTheme, isDark } = useTheme();
   const { isInstalled, isInstallable, isOnline, installApp, requestNotificationPermission } = usePWA();
+
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showSocialModal, setShowSocialModal] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'info') => {
+    setToast({ message, type });
+  };
 
   const handleInstall = async () => {
     await installApp();
@@ -14,25 +480,13 @@ const Settings = ({ userRole, onLogout }) => {
   const handleNotifications = async () => {
     const permission = await requestNotificationPermission();
     if (permission === 'granted') {
-      alert('Notifications enabled!');
+      showToast('Notifications enabled!', 'success');
     } else if (permission === 'denied') {
-      alert('Notification permission denied. Enable in browser settings.');
+      showToast('Notification permission denied. Enable in browser settings.', 'error');
     }
   };
 
   const settingGroups = [
-    {
-      title: 'Appearance',
-      items: [
-        {
-          icon: isDark ? Moon : Sun,
-          label: 'Theme',
-          value: isDark ? 'Dark' : 'Light',
-          action: toggleTheme,
-          type: 'toggle',
-        },
-      ],
-    },
     {
       title: 'App',
       items: [
@@ -57,7 +511,7 @@ const Settings = ({ userRole, onLogout }) => {
         {
           icon: Bell,
           label: 'Push Notifications',
-          value: Notification.permission === 'granted' ? 'Enabled' : 'Disabled',
+          value: typeof Notification !== 'undefined' && Notification.permission === 'granted' ? 'Enabled' : 'Disabled',
           action: handleNotifications,
           type: 'link',
         },
@@ -69,11 +523,25 @@ const Settings = ({ userRole, onLogout }) => {
         {
           icon: User,
           label: 'Profile',
+          action: () => setShowProfileModal(true),
           type: 'link',
         },
         {
           icon: Lock,
           label: 'Privacy & Security',
+          action: () => setShowPrivacyModal(true),
+          type: 'link',
+        },
+      ],
+    },
+    {
+      title: 'Social',
+      items: [
+        {
+          icon: Users,
+          label: 'Social & Live Features',
+          value: 'Encouragement, Leaderboard',
+          action: () => setShowSocialModal(true),
           type: 'link',
         },
       ],
@@ -84,6 +552,7 @@ const Settings = ({ userRole, onLogout }) => {
         {
           icon: HelpCircle,
           label: 'Help Center',
+          action: () => setShowHelpModal(true),
           type: 'link',
         },
       ],
@@ -92,11 +561,14 @@ const Settings = ({ userRole, onLogout }) => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-gradient-to-b from-carbon-900 via-carbon-950 to-black dark:from-carbon-900 dark:via-carbon-950 dark:to-black light:from-gray-50 light:via-gray-100 light:to-gray-200 pb-24">
+      <div className="min-h-screen pb-24">
         <header className="sticky top-0 z-30 bg-carbon-900/90 backdrop-blur-lg border-b border-slate-800">
-          <div className="p-4">
-            <p className="text-gold-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
-            <h1 className="text-white text-xl font-bold">Settings</h1>
+          <div className="p-4 flex items-center gap-3">
+            <img src="/logo.png" alt="STS" className="w-10 h-10 object-contain" />
+            <div>
+              <p className="text-gold-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
+              <h1 className="text-white text-xl font-bold">Settings</h1>
+            </div>
           </div>
         </header>
 
@@ -125,23 +597,7 @@ const Settings = ({ userRole, onLogout }) => {
                       {item.value && (
                         <span className="text-gray-400 text-sm">{item.value}</span>
                       )}
-                      {item.type === 'toggle' ? (
-                        <div
-                          className={`w-12 h-7 rounded-full p-1 transition-colors ${
-                            isDark ? 'bg-gold-500' : 'bg-slate-600'
-                          }`}
-                          role="switch"
-                          aria-checked={isDark}
-                        >
-                          <div
-                            className={`w-5 h-5 bg-white rounded-full transition-transform ${
-                              isDark ? 'translate-x-5' : 'translate-x-0'
-                            }`}
-                          />
-                        </div>
-                      ) : (
-                        <ChevronRight size={20} className="text-gray-500" aria-hidden="true" />
-                      )}
+                      <ChevronRight size={20} className="text-gray-500" aria-hidden="true" />
                     </div>
                   </button>
                 );
@@ -162,10 +618,30 @@ const Settings = ({ userRole, onLogout }) => {
           </SlideIn>
 
           <p className="text-center text-gray-500 text-sm">
-            STS M0TIV8R v1.1.0
+            STS M0TIV8R v1.2.0
           </p>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
+      {/* Modals */}
+      {showProfileModal && <ProfileModal onClose={() => setShowProfileModal(false)} />}
+      {showPrivacyModal && (
+        <PrivacyModal
+          onClose={() => setShowPrivacyModal(false)}
+          onDeleteAccount={onLogout}
+        />
+      )}
+      {showHelpModal && <HelpModal onClose={() => setShowHelpModal(false)} />}
+      {showSocialModal && <SocialSettingsModal onClose={() => setShowSocialModal(false)} />}
     </PageTransition>
   );
 };

@@ -1,11 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { ChevronLeft, CheckCircle } from 'lucide-react';
 import ExerciseCard from '../components/workout/ExerciseCard';
 import WarmupSection from '../components/workout/WarmupSection';
+import FinisherSection from '../components/workout/FinisherSection';
 import SetLoggingModal from '../components/workout/SetLoggingModal';
 import RestTimer from '../components/workout/RestTimer';
 import PRCelebration from '../components/workout/PRCelebration';
+import LiveEncouragement from '../components/workout/LiveEncouragement';
 import { saveWorkout, savePR, getPRs } from '../services/localStorage';
+import { logWorkout as logWorkoutFirestore, logPR as logPRFirestore } from '../services/database';
+import { isFirebaseConfigured } from '../services/firebase';
+import { getSocialSettings } from '../components/settings/SocialSettings';
 
 // Sample workout data (this would come from the assigned program)
 const mockExercises = [
@@ -22,6 +27,12 @@ const warmupExercises = [
   { name: 'T-Spine Rotation', prescription: '2×10' },
 ];
 
+const finisherExercises = [
+  { id: 'f1', name: 'Assisted Hip Airplanes', prescription: '2×10 each side', videoId: null },
+  { id: 'f2', name: 'Rolling Plank', prescription: '2×20 (10 each direction)', videoId: null },
+  { id: 'f3', name: 'Dead Bug', prescription: '2×10 each side', videoId: null },
+];
+
 const Workout = ({ techMode, onToggleTechMode, onExit }) => {
   const [completedSets, setCompletedSets] = useState({});
   const [loggedSets, setLoggedSets] = useState({});
@@ -34,6 +45,26 @@ const Workout = ({ techMode, onToggleTechMode, onExit }) => {
   const [currentRestDuration, setCurrentRestDuration] = useState(90);
   const [workoutStartTime] = useState(Date.now());
   const [workoutComplete, setWorkoutComplete] = useState(false);
+  const [setCompleteTrigger, setSetCompleteTrigger] = useState(0);
+
+  // Memoize social settings to avoid re-computation on every render
+  const socialSettings = useMemo(() => getSocialSettings(), []);
+  // Track exercise completion order (array of exercise IDs in order completed)
+  const [exerciseCompletionOrder, setExerciseCompletionOrder] = useState([]);
+
+  // Check if an exercise is fully completed (all sets done)
+  const isExerciseComplete = (exerciseId, exercise) => {
+    const completed = completedSets[exerciseId] || [];
+    return completed.length >= exercise.sets;
+  };
+
+  // Separate exercises into in-progress and completed
+  const inProgressExercises = mockExercises.filter(
+    ex => !isExerciseComplete(ex.id, ex)
+  );
+  const completedExercises = exerciseCompletionOrder
+    .map(id => mockExercises.find(ex => ex.id === id))
+    .filter(Boolean);
 
   const handleStartSet = (exercise, setNum) => {
     setActiveExercise(exercise);
@@ -43,29 +74,47 @@ const Workout = ({ techMode, onToggleTechMode, onExit }) => {
   const handleLogSet = (data) => {
     const exerciseId = activeExercise.id;
     const setIndex = activeSetNumber - 1;
+    const exercise = activeExercise;
 
     // Track completed sets
+    const newCompletedSets = [...(completedSets[exerciseId] || []), setIndex];
     setCompletedSets((prev) => ({
       ...prev,
-      [exerciseId]: [...(prev[exerciseId] || []), setIndex],
+      [exerciseId]: newCompletedSets,
     }));
 
-    // Track logged data
+    // Check if this completes the exercise (add to completion order)
+    if (newCompletedSets.length >= exercise.sets && !exerciseCompletionOrder.includes(exerciseId)) {
+      setExerciseCompletionOrder(prev => [...prev, exerciseId]);
+    }
+
+    // Track logged data with timestamp for order tracking
     setLoggedSets((prev) => ({
       ...prev,
       [exerciseId]: [
         ...(prev[exerciseId] || []),
-        { setNum: activeSetNumber, ...data },
+        { setNum: activeSetNumber, ...data, completedAt: new Date().toISOString() },
       ],
     }));
+
+    // Trigger XP and encouragement animation
+    setSetCompleteTrigger(prev => prev + 1);
 
     // Check for PR
     const currentPRs = getPRs('demo');
     const exercisePR = currentPRs[activeExercise.name]?.weight || activeExercise.lastWeight;
 
     if (data.weight > exercisePR) {
-      // Save new PR
+      // Save new PR to localStorage (immediate)
       savePR('demo', activeExercise.name, data.weight, data.reps);
+
+      // Also save to Firestore if configured (async)
+      if (isFirebaseConfigured) {
+        logPRFirestore('demo', activeExercise.name, data.weight, data.reps).catch(() => {
+          // Silently fail - localStorage backup ensures no data loss
+        });
+      }
+
       setPrData({
         exercise: activeExercise.name,
         newPR: data.weight,
@@ -81,8 +130,12 @@ const Workout = ({ techMode, onToggleTechMode, onExit }) => {
     setActiveSetNumber(null);
   };
 
-  // Save workout when complete
-  const handleFinishWorkout = () => {
+  // Save workout (can be called on complete or exit)
+  const saveCurrentWorkout = useCallback(async (completed = false) => {
+    // Only save if there are logged sets
+    const hasLoggedSets = Object.values(loggedSets).some(sets => sets.length > 0);
+    if (!hasLoggedSets) return null;
+
     const duration = Math.round((Date.now() - workoutStartTime) / 60000);
 
     const workout = {
@@ -94,10 +147,38 @@ const Workout = ({ techMode, onToggleTechMode, onExit }) => {
         name: ex.name,
         sets: loggedSets[ex.id] || [],
       })),
-      completed: true,
+      // Store completion order for coach analytics
+      exerciseCompletionOrder: exerciseCompletionOrder.map(id => {
+        const exercise = mockExercises.find(ex => ex.id === id);
+        return exercise ? exercise.name : null;
+      }).filter(Boolean),
+      completed,
     };
 
+    // Save to localStorage (immediate, works offline)
     saveWorkout(workout);
+
+    // Also save to Firestore if configured (async, for coach access)
+    if (isFirebaseConfigured) {
+      try {
+        await logWorkoutFirestore('demo', workout);
+      } catch (err) {
+        // Silently fail - localStorage backup ensures no data loss
+      }
+    }
+
+    return workout;
+  }, [loggedSets, workoutStartTime, exerciseCompletionOrder]);
+
+  // Handle exit - save progress before leaving
+  const handleExit = () => {
+    saveCurrentWorkout(false); // Save as incomplete
+    onExit();
+  };
+
+  // Save workout when complete
+  const handleFinishWorkout = () => {
+    saveCurrentWorkout(true);
     setWorkoutComplete(true);
 
     // Exit after showing completion
@@ -111,11 +192,11 @@ const Workout = ({ techMode, onToggleTechMode, onExit }) => {
   const progress = (completedTotal / totalSets) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-carbon-900 via-carbon-950 to-black pb-24">
+    <div className="min-h-screen pb-24">
       <header className="sticky top-0 z-30 bg-carbon-900/90 backdrop-blur-lg border-b border-slate-800">
         <div className="flex items-center justify-between p-4">
           <button
-            onClick={onExit}
+            onClick={handleExit}
             className="flex items-center gap-2 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-gold-400 rounded-lg"
             aria-label="Exit workout"
           >
@@ -175,22 +256,51 @@ const Workout = ({ techMode, onToggleTechMode, onExit }) => {
           onToggle={() => setWarmupExpanded(!warmupExpanded)}
         />
 
-        {mockExercises.map((exercise, i) => (
-          <ExerciseCard
-            key={exercise.id}
-            exercise={exercise}
-            index={i + 1}
-            completedSets={completedSets[exercise.id] || []}
-            onStartSet={handleStartSet}
-            techMode={techMode}
-            isActive={activeExercise?.id === exercise.id}
-          />
-        ))}
+        {/* In Progress Exercises */}
+        {inProgressExercises.length > 0 && (
+          <>
+            {completedExercises.length > 0 && (
+              <h2 className="text-gray-400 text-sm uppercase tracking-wide mb-3 mt-2 flex items-center gap-2">
+                <span className="w-2 h-2 bg-gold-400 rounded-full animate-pulse"></span>
+                In Progress
+              </h2>
+            )}
+            {inProgressExercises.map((exercise) => (
+              <ExerciseCard
+                key={exercise.id}
+                exercise={exercise}
+                index={mockExercises.indexOf(exercise) + 1}
+                completedSets={completedSets[exercise.id] || []}
+                onStartSet={handleStartSet}
+                techMode={techMode}
+                isActive={activeExercise?.id === exercise.id}
+              />
+            ))}
+          </>
+        )}
 
-        <div className="bg-carbon-800/30 rounded-2xl p-5 border border-carbon-700/50">
-          <h3 className="text-gray-400 text-sm uppercase tracking-wide mb-3">Finisher / Accessory</h3>
-          <p className="text-gray-300">Assisted hip airplanes 2×10, rolling plank 2×20</p>
-        </div>
+        {/* Completed Exercises */}
+        {completedExercises.length > 0 && (
+          <>
+            <h2 className="text-green-400 text-sm uppercase tracking-wide mb-3 mt-6 flex items-center gap-2">
+              <CheckCircle size={14} />
+              Completed ({completedExercises.length})
+            </h2>
+            {completedExercises.map((exercise) => (
+              <ExerciseCard
+                key={exercise.id}
+                exercise={exercise}
+                index={mockExercises.indexOf(exercise) + 1}
+                completedSets={completedSets[exercise.id] || []}
+                onStartSet={handleStartSet}
+                techMode={techMode}
+                isActive={false}
+              />
+            ))}
+          </>
+        )}
+
+        <FinisherSection exercises={finisherExercises} />
 
         {/* Finish Workout Button */}
         {progress >= 50 && !workoutComplete && (
@@ -249,6 +359,14 @@ const Workout = ({ techMode, onToggleTechMode, onExit }) => {
           setCurrentRestDuration(90);
           setShowRestTimer(true);
         }}
+      />
+
+      {/* Live Encouragement System - hidden during rest timer and modals */}
+      <LiveEncouragement
+        isActive={!workoutComplete && !showRestTimer && !activeExercise && !showPRCelebration}
+        onSetComplete={setCompleteTrigger}
+        currentExercise={activeExercise}
+        userSettings={socialSettings}
       />
     </div>
   );

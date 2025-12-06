@@ -1,10 +1,10 @@
-import { Home, BarChart3, MessageSquare, ClipboardList, Settings, Users, Video } from 'lucide-react';
+import { Home, BarChart3, MessageSquare, ClipboardList, Settings, Users, Video, Radio } from 'lucide-react';
 
 const BottomNav = ({ activeTab, onChangeTab, userRole }) => {
   const athleteTabs = [
     { id: 'home', icon: Home, label: 'Home' },
+    { id: 'live', icon: Radio, label: 'Live' },
     { id: 'progress', icon: BarChart3, label: 'Progress' },
-    { id: 'chat', icon: MessageSquare, label: 'Chat' },
     { id: 'program', icon: ClipboardList, label: 'Program' },
     { id: 'settings', icon: Settings, label: 'Settings' },
   ];

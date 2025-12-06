@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, TrendingUp, Dumbbell, Clock, Trophy } from 'lucide-react';
+import { getWorkouts } from '../services/localStorage';
 
-// Mock data - will be replaced with Firestore
-const mockWorkoutHistory = [
+// Default mock data for demo
+const defaultWorkoutHistory = [
   {
     id: 1,
     date: '2025-12-05',
@@ -51,8 +52,36 @@ const mockWorkoutHistory = [
 
 const WorkoutHistory = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date());
-  const [workouts] = useState(mockWorkoutHistory);
+  const [workouts, setWorkouts] = useState(defaultWorkoutHistory);
   const [selectedWorkout, setSelectedWorkout] = useState(null);
+
+  // Load workouts from localStorage and merge with defaults
+  useEffect(() => {
+    const savedWorkouts = getWorkouts();
+    if (savedWorkouts && savedWorkouts.length > 0) {
+      // Transform saved workouts to match our format
+      const transformedWorkouts = savedWorkouts.map((w, index) => ({
+        id: w.id || `saved-${index}`,
+        date: w.date ? new Date(w.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        name: w.name || 'Workout',
+        duration: w.duration || 0,
+        exercises: w.exercises?.length || 0,
+        totalSets: w.exercises?.reduce((acc, ex) => acc + (ex.sets?.length || 0), 0) || 0,
+        completedSets: w.exercises?.reduce((acc, ex) => acc + (ex.sets?.filter(s => s.completed !== false).length || 0), 0) || 0,
+        volume: w.exercises?.reduce((acc, ex) =>
+          acc + (ex.sets?.reduce((setAcc, s) => setAcc + ((s.weight || 0) * (s.reps || 0)), 0) || 0), 0) || 0,
+        prs: 0, // Would need PR tracking
+        rawData: w, // Keep original data for detail view
+      }));
+
+      // Merge with defaults, putting saved workouts first
+      const existingDates = transformedWorkouts.map(w => w.date);
+      const filteredDefaults = defaultWorkoutHistory.filter(w => !existingDates.includes(w.date));
+      setWorkouts([...transformedWorkouts, ...filteredDefaults].sort((a, b) =>
+        new Date(b.date) - new Date(a.date)
+      ));
+    }
+  }, []);
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
@@ -92,11 +121,14 @@ const WorkoutHistory = () => {
   const avgDuration = thisMonthWorkouts.length > 0 ? Math.round(thisMonthWorkouts.reduce((acc, w) => acc + w.duration, 0) / thisMonthWorkouts.length) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-carbon-900 via-carbon-950 to-black pb-24">
+    <div className="min-h-screen pb-24">
       <header className="sticky top-0 z-30 bg-carbon-900/90 backdrop-blur-lg border-b border-slate-800">
-        <div className="p-4">
-          <p className="text-gold-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
-          <h1 className="text-white text-xl font-bold">Workout History</h1>
+        <div className="p-4 flex items-center gap-3">
+          <img src="/logo.png" alt="STS" className="w-10 h-10 object-contain" />
+          <div>
+            <p className="text-gold-400 font-bold text-sm tracking-wider">STS M0TIV8R</p>
+            <h1 className="text-white text-xl font-bold">Workout History</h1>
+          </div>
         </div>
       </header>
 

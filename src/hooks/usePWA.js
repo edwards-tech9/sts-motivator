@@ -42,7 +42,6 @@ export const usePWA = () => {
       navigator.serviceWorker.register('/sw.js')
         .then((reg) => {
           setRegistration(reg);
-          console.log('[PWA] Service worker registered');
 
           // Check for updates
           reg.addEventListener('updatefound', () => {
@@ -107,7 +106,7 @@ export const usePWA = () => {
   };
 
   const showNotification = (title, options = {}) => {
-    if (Notification.permission === 'granted' && registration) {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && registration) {
       registration.showNotification(title, {
         icon: '/favicon.svg',
         badge: '/favicon.svg',

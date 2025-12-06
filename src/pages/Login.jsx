@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Mail, Lock, User, Eye, EyeOff, Dumbbell, Users } from 'lucide-react';
 import { signUpWithEmail, signInWithEmail, signInWithGoogle, resetPassword } from '../services/auth';
 
-const Login = ({ onSuccess }) => {
+const Login = ({ onSuccess, onDemoMode }) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -86,9 +86,25 @@ const Login = ({ onSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-carbon-900 via-carbon-950 to-black flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-b from-carbon-900 via-carbon-950 to-black flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Massive Watermark Logo Background */}
+      <div
+        className="absolute inset-0 pointer-events-none flex items-center justify-center"
+        aria-hidden="true"
+      >
+        <img
+          src="/logo.png"
+          alt=""
+          className="w-[180vw] max-w-none h-auto opacity-[0.04] select-none"
+          style={{
+            filter: 'grayscale(20%)',
+            transform: 'rotate(-12deg) scale(1.3)',
+          }}
+        />
+      </div>
+
       {/* Logo */}
-      <div className="mb-8 text-center">
+      <div className="mb-8 text-center relative z-10">
         <img
           src="/logo.png"
           alt="Scullin Training Systems"
@@ -105,7 +121,7 @@ const Login = ({ onSuccess }) => {
 
       {/* Role Selection (only for sign up) */}
       {isSignUp && !isForgotPassword && (
-        <div className="w-full max-w-sm mb-6">
+        <div className="w-full max-w-sm mb-6 relative z-10">
           <p className="text-gray-400 text-sm text-center mb-3">I am a...</p>
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -147,7 +163,7 @@ const Login = ({ onSuccess }) => {
       )}
 
       {/* Form Card */}
-      <div className="w-full max-w-sm bg-carbon-800/50 rounded-3xl p-6 border border-gold-500/20">
+      <div className="w-full max-w-sm bg-carbon-800/50 rounded-3xl p-6 border border-gold-500/20 relative z-10">
         <h2 className="text-xl font-bold text-white text-center mb-6">
           {isForgotPassword ? 'Reset Password' : isSignUp ? 'Create Account' : 'Welcome Back'}
         </h2>
@@ -324,7 +340,18 @@ const Login = ({ onSuccess }) => {
         </div>
       </div>
 
-      <p className="text-gray-500 text-xs mt-8 text-center">
+      {/* Demo Mode Button */}
+      {onDemoMode && (
+        <button
+          type="button"
+          onClick={onDemoMode}
+          className="mt-6 text-gray-400 hover:text-white text-sm underline relative z-10 transition-colors"
+        >
+          Continue without account (Demo Mode)
+        </button>
+      )}
+
+      <p className="text-gray-500 text-xs mt-8 text-center relative z-10">
         By continuing, you agree to our Terms of Service and Privacy Policy
       </p>
     </div>
