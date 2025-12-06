@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Zap, TrendingUp, Star } from 'lucide-react';
-import { getGamificationState, checkDailyBonus } from '../../services/gamificationService';
+import { Zap, TrendingUp, Star, Target, Calendar, Flame } from 'lucide-react';
+import { getGamificationState, checkDailyBonus, getStreakStatus } from '../../services/gamificationService';
 import { RARITY_COLORS } from '../../data/gamification';
 
 const XPDisplay = ({ compact = false, showBonus = true }) => {
@@ -106,6 +106,78 @@ const XPDisplay = ({ compact = false, showBonus = true }) => {
         </p>
       </div>
 
+      {/* Daily & Weekly Goals */}
+      <div className="mb-4 space-y-3">
+        {/* Daily Goal */}
+        <div className="bg-carbon-900/30 rounded-xl p-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Target size={16} className="text-green-400" />
+              <span className="text-sm text-gray-300">Daily Goal</span>
+            </div>
+            <span className={`text-sm font-semibold ${
+              (state.dailyXP?.earned || 0) >= (state.dailyXP?.goal || 200)
+                ? 'text-green-400'
+                : 'text-gray-400'
+            }`}>
+              {state.dailyXP?.earned || 0}/{state.dailyXP?.goal || 200} XP
+            </span>
+          </div>
+          <div className="h-2 bg-carbon-700 rounded-full overflow-hidden">
+            <div
+              className={`h-full transition-all duration-500 rounded-full ${
+                (state.dailyXP?.earned || 0) >= (state.dailyXP?.goal || 200)
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-400'
+                  : 'bg-gradient-to-r from-blue-500 to-blue-400'
+              }`}
+              style={{ width: `${Math.min(100, ((state.dailyXP?.earned || 0) / (state.dailyXP?.goal || 200)) * 100)}%` }}
+            />
+          </div>
+          {(state.dailyXP?.earned || 0) >= (state.dailyXP?.goal || 200) && (
+            <p className="text-xs text-green-400 mt-1 flex items-center gap-1">
+              <span>✓</span> Daily goal complete! +25 XP bonus
+            </p>
+          )}
+        </div>
+
+        {/* Weekly Goal */}
+        <div className="bg-carbon-900/30 rounded-xl p-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Calendar size={16} className="text-purple-400" />
+              <span className="text-sm text-gray-300">Weekly Goal</span>
+            </div>
+            <span className={`text-sm font-semibold ${
+              (state.weeklyXP?.earned || 0) >= (state.weeklyXP?.goal || 1000)
+                ? 'text-green-400'
+                : 'text-gray-400'
+            }`}>
+              {state.weeklyXP?.earned || 0}/{state.weeklyXP?.goal || 1000} XP
+            </span>
+          </div>
+          <div className="h-2 bg-carbon-700 rounded-full overflow-hidden">
+            <div
+              className={`h-full transition-all duration-500 rounded-full ${
+                (state.weeklyXP?.earned || 0) >= (state.weeklyXP?.goal || 1000)
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-400'
+                  : 'bg-gradient-to-r from-purple-500 to-purple-400'
+              }`}
+              style={{ width: `${Math.min(100, ((state.weeklyXP?.earned || 0) / (state.weeklyXP?.goal || 1000)) * 100)}%` }}
+            />
+          </div>
+          {(state.weeklyXP?.lastWeekEarned || 0) > 0 && (
+            <p className="text-xs text-gray-500 mt-1">
+              Last week: {state.weeklyXP.lastWeekEarned} XP
+              {(state.weeklyXP?.earned || 0) > (state.weeklyXP?.lastWeekEarned || 0) && (
+                <span className="text-green-400 ml-1">
+                  (+{Math.round(((state.weeklyXP.earned - state.weeklyXP.lastWeekEarned) / state.weeklyXP.lastWeekEarned) * 100)}%)
+                </span>
+              )}
+            </p>
+          )}
+        </div>
+      </div>
+
       {/* Quick Stats */}
       <div className="grid grid-cols-3 gap-2">
         <div className="bg-carbon-900/50 rounded-xl p-3 text-center">
@@ -119,9 +191,9 @@ const XPDisplay = ({ compact = false, showBonus = true }) => {
           <p className="text-gray-500 text-xs">Badges</p>
         </div>
         <div className="bg-carbon-900/50 rounded-xl p-3 text-center">
-          <Zap size={18} className="mx-auto text-gold-400 mb-1" />
-          <p className="text-white font-bold">{state.stats.totalWorkouts}</p>
-          <p className="text-gray-500 text-xs">Workouts</p>
+          <Flame size={18} className="mx-auto text-orange-400 mb-1" />
+          <p className="text-white font-bold">{state.stats.encouragementsSent || 0}</p>
+          <p className="text-gray-500 text-xs">Encouraged</p>
         </div>
       </div>
     </div>

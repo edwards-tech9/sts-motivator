@@ -46,6 +46,12 @@ export const BADGES = {
   streak_14: { id: 'streak_14', name: 'Two Week Terror', description: '14-day workout streak', icon: '🔥', rarity: 'rare', xpBonus: 150 },
   streak_30: { id: 'streak_30', name: 'Monthly Monster', description: '30-day workout streak', icon: '🔥', rarity: 'epic', xpBonus: 300 },
   streak_100: { id: 'streak_100', name: 'Century Strong', description: '100-day workout streak', icon: '👑', rarity: 'legendary', xpBonus: 1000 },
+  streak_365: { id: 'streak_365', name: 'Annual Legend', description: '365-day workout streak', icon: '🏆', rarity: 'legendary', xpBonus: 5000 },
+
+  // Encouragement badges
+  encourager_10: { id: 'encourager_10', name: 'Motivator', description: 'Send 10 encouragements', icon: '🔥', rarity: 'common', xpBonus: 30 },
+  encourager_50: { id: 'encourager_50', name: 'Hype Machine', description: 'Send 50 encouragements', icon: '🔥', rarity: 'uncommon', xpBonus: 75 },
+  encourager_100: { id: 'encourager_100', name: 'Community Champion', description: 'Send 100 encouragements', icon: '🔥', rarity: 'rare', xpBonus: 150 },
 
   // Workout count badges
   workouts_1: { id: 'workouts_1', name: 'First Rep', description: 'Complete your first workout', icon: '💪', rarity: 'common', xpBonus: 25 },

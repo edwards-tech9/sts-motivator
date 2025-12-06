@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Radio, Flame, Trophy, TrendingUp, Dumbbell, Clock, Filter, Users } from 'lucide-react';
+import { Radio, Flame, Trophy, TrendingUp, Dumbbell, Clock, Filter, Users, Zap } from 'lucide-react';
 import { PageTransition, SlideIn, StaggerContainer, ScaleIn } from '../components/ui/AnimatedComponents';
 import { getSocialSettings } from '../components/settings/SocialSettings';
 import { getLiveActivity, saveEncouragement } from '../services/localStorage';
+import { awardEncouragementXP } from '../services/gamificationService';
 
 // Fallback mock data when no real athletes
 const MOCK_LIVE_USERS = [
@@ -58,8 +59,12 @@ const LiveActivity = () => {
           message: 'Sent encouragement',
           fromPage: 'live-activity',
         });
-        // Show toast notification
-        setShowToast(`Sent encouragement to ${user.name}!`);
+
+        // Award XP for sending encouragement
+        const xpResult = awardEncouragementXP();
+
+        // Show toast notification with XP
+        setShowToast(`Sent encouragement to ${user.name}! +${xpResult.xpAwarded} XP`);
         setTimeout(() => setShowToast(null), 2500);
       }
       setEncouragedUsers([...encouragedUsers, userId]);

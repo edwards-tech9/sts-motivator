@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Flame, Zap, Star, Heart, Trophy, Users, Send, X } from 'lucide-react';
 import { saveEncouragement } from '../../services/localStorage';
+import { awardEncouragementXP } from '../../services/gamificationService';
 
 // Gaming Psychology: Variable Reward System
 // Messages are weighted by intensity to create dopamine-triggering unpredictability
@@ -310,6 +311,8 @@ const LiveEncouragement = ({
       message: 'Sent encouragement during workout',
       fromPage: 'live-encouragement',
     });
+    // Award XP for sending encouragement
+    awardEncouragementXP();
     setEncouragementCount(prev => prev + 1);
   };
 

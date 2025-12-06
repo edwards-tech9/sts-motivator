@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Play, Pause, Users, Flame, ChevronUp, ChevronDown } from 'lucide-react';
 import { getSocialSettings } from '../settings/SocialSettings';
 import { saveEncouragement, getLiveActivity } from '../../services/localStorage';
+import { awardEncouragementXP } from '../../services/gamificationService';
 
 // Simulated live users working out
 const MOCK_LIVE_USERS = [
@@ -44,6 +45,8 @@ const RestTimer = ({ duration, onComplete, onSkip }) => {
           message: 'Sent encouragement during rest',
           fromPage: 'rest-timer',
         });
+        // Award XP for sending encouragement
+        awardEncouragementXP();
       }
       setEncouragedUsers([...encouragedUsers, userId]);
     }

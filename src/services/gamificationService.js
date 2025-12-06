@@ -35,10 +35,26 @@ const getState = () => {
       totalVolume: 0,
       totalPRs: 0,
       sharesCount: 0,
+      encouragementsSent: 0,
       exerciseSets: {}, // { "Back Squat": 15, "Bench Press": 20 }
     },
     dailyBonus: null,
     lastBonusCheck: null,
+    // Daily XP Goals
+    dailyXP: {
+      today: new Date().toDateString(),
+      earned: 0,
+      goal: 200,
+    },
+    // Weekly XP Tracking
+    weeklyXP: {
+      weekStart: null,
+      earned: 0,
+      goal: 1000,
+      lastWeekEarned: 0,
+    },
+    // Streak milestones claimed
+    claimedMilestones: [],
   };
 };
 
@@ -51,6 +67,60 @@ const saveState = (state) => {
   }
 };
 
+// Streak milestones configuration
+const STREAK_MILESTONES = {
+  7: { xp: 75, badge: 'streak_7', name: 'Week Warrior' },
+  14: { xp: 150, badge: 'streak_14', name: 'Fortnight Fighter' },
+  30: { xp: 300, badge: 'streak_30', name: 'Monthly Master' },
+  100: { xp: 1000, badge: 'streak_100', name: 'Century Club' },
+  365: { xp: 5000, badge: 'streak_365', name: 'Annual Legend' },
+};
+
+// Helper to update daily XP tracking
+const updateDailyXP = (state, xpAmount) => {
+  const today = new Date().toDateString();
+
+  // Reset if new day
+  if (!state.dailyXP || state.dailyXP.today !== today) {
+    state.dailyXP = {
+      today,
+      earned: 0,
+      goal: state.dailyXP?.goal || 200,
+    };
+  }
+
+  const previousEarned = state.dailyXP.earned;
+  state.dailyXP.earned += xpAmount;
+
+  // Check if just hit daily goal
+  const justHitGoal = previousEarned < state.dailyXP.goal && state.dailyXP.earned >= state.dailyXP.goal;
+
+  return { dailyGoalReached: justHitGoal };
+};
+
+// Helper to update weekly XP tracking
+const updateWeeklyXP = (state, xpAmount) => {
+  const weekStart = getWeekStart();
+
+  // Reset if new week
+  if (!state.weeklyXP || state.weeklyXP.weekStart !== weekStart) {
+    state.weeklyXP = {
+      weekStart,
+      earned: 0,
+      goal: state.weeklyXP?.goal || 1000,
+      lastWeekEarned: state.weeklyXP?.earned || 0,
+    };
+  }
+
+  const previousEarned = state.weeklyXP.earned;
+  state.weeklyXP.earned += xpAmount;
+
+  // Check if just hit weekly goal
+  const justHitGoal = previousEarned < state.weeklyXP.goal && state.weeklyXP.earned >= state.weeklyXP.goal;
+
+  return { weeklyGoalReached: justHitGoal };
+};
+
 // Add XP with multiplier support
 export const addXP = (action, multiplier = 1) => {
   const state = getState();
@@ -59,13 +129,119 @@ export const addXP = (action, multiplier = 1) => {
 
   state.xp += earnedXP;
   state.totalXP += earnedXP;
+
+  // Track daily and weekly XP
+  const dailyResult = updateDailyXP(state, earnedXP);
+  const weeklyResult = updateWeeklyXP(state, earnedXP);
+
+  // Award bonus XP for hitting goals
+  let bonusXP = 0;
+  if (dailyResult.dailyGoalReached) {
+    bonusXP += 25;
+    state.xp += 25;
+    state.totalXP += 25;
+  }
+  if (weeklyResult.weeklyGoalReached) {
+    bonusXP += 100;
+    state.xp += 100;
+    state.totalXP += 100;
+  }
+
   saveState(state);
 
   return {
-    earnedXP,
+    earnedXP: earnedXP + bonusXP,
+    baseXP: earnedXP,
+    bonusXP,
     totalXP: state.xp,
     level: getLevelFromXP(state.xp),
     progress: getXPProgress(state.xp),
+    dailyGoalReached: dailyResult.dailyGoalReached,
+    weeklyGoalReached: weeklyResult.weeklyGoalReached,
+    dailyXP: state.dailyXP,
+    weeklyXP: state.weeklyXP,
+  };
+};
+
+// Award XP for sending encouragement
+export const awardEncouragementXP = () => {
+  const state = getState();
+  const xpAmount = 5;
+
+  // Track encouragements sent
+  if (!state.stats.encouragementsSent) state.stats.encouragementsSent = 0;
+  state.stats.encouragementsSent += 1;
+
+  state.xp += xpAmount;
+  state.totalXP += xpAmount;
+
+  // Track daily and weekly
+  updateDailyXP(state, xpAmount);
+  updateWeeklyXP(state, xpAmount);
+
+  saveState(state);
+
+  return {
+    xpAwarded: xpAmount,
+    totalEncouragements: state.stats.encouragementsSent,
+    totalXP: state.xp,
+  };
+};
+
+// Check and claim streak milestone rewards
+export const checkStreakMilestones = () => {
+  const state = getState();
+  const claimedRewards = [];
+
+  if (!state.claimedMilestones) state.claimedMilestones = [];
+
+  for (const [days, reward] of Object.entries(STREAK_MILESTONES)) {
+    const dayNum = parseInt(days);
+    if (state.streakDays >= dayNum && !state.claimedMilestones.includes(days)) {
+      // Claim this milestone
+      state.claimedMilestones.push(days);
+      state.xp += reward.xp;
+      state.totalXP += reward.xp;
+
+      claimedRewards.push({
+        days: dayNum,
+        xp: reward.xp,
+        name: reward.name,
+        badge: reward.badge,
+      });
+    }
+  }
+
+  if (claimedRewards.length > 0) {
+    saveState(state);
+  }
+
+  return claimedRewards;
+};
+
+// Get streak status including at-risk warning
+export const getStreakStatus = () => {
+  const state = getState();
+  const now = new Date();
+  const lastWorkout = state.lastWorkoutDate ? new Date(state.lastWorkoutDate) : null;
+
+  // Check if streak is at risk (no workout today and it's getting late)
+  const today = now.toDateString();
+  const workedOutToday = lastWorkout && lastWorkout.toDateString() === today;
+  const hourOfDay = now.getHours();
+
+  const isAtRisk = !workedOutToday && hourOfDay >= 18; // After 6 PM
+  const nextMilestone = Object.keys(STREAK_MILESTONES)
+    .map(Number)
+    .sort((a, b) => a - b)
+    .find(m => m > state.streakDays);
+
+  return {
+    currentStreak: state.streakDays,
+    workedOutToday,
+    isAtRisk,
+    nextMilestone,
+    daysToNextMilestone: nextMilestone ? nextMilestone - state.streakDays : null,
   };
 };
 
@@ -514,7 +690,10 @@ export const getWeeklyChallengeLog = () => {
 
 export default {
   addXP,
+  awardEncouragementXP,
   checkBadges,
+  checkStreakMilestones,
+  getStreakStatus,
   updateStreak,
   recordSet,
   recordWorkout,

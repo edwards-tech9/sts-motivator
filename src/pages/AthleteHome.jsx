@@ -8,13 +8,14 @@ import BadgeGrid from '../components/gamification/BadgeGrid';
 import DailyQuests from '../components/gamification/DailyQuests';
 import Leaderboard from '../components/gamification/Leaderboard';
 import BodyMetricsTracker from '../components/tracking/BodyMetricsTracker';
-import { getGamificationState } from '../services/gamificationService';
+import { getGamificationState, getStreakStatus } from '../services/gamificationService';
 
 const AthleteHome = ({ onStartWorkout, userName = 'Dadward' }) => {
   const [showBadges, setShowBadges] = useState(false);
   const [showQuests, setShowQuests] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const gamificationState = getGamificationState();
+  const streakStatus = getStreakStatus();
 
   return (
   <PageTransition>
@@ -44,6 +45,88 @@ const AthleteHome = ({ onStartWorkout, userName = 'Dadward' }) => {
             <XPDisplay compact />
           </div>
         </SlideIn>
+
+        {/* Daily/Weekly Goal Progress */}
+        <SlideIn delay={75}>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            {/* Daily Goal */}
+            <div className="bg-carbon-800/50 rounded-xl p-3">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-1.5">
+                  <Target size={14} className="text-green-400" />
+                  <span className="text-xs text-gray-400">Daily</span>
+                </div>
+                <span className={`text-xs font-semibold ${
+                  (gamificationState.dailyXP?.earned || 0) >= (gamificationState.dailyXP?.goal || 200)
+                    ? 'text-green-400' : 'text-gray-400'
+                }`}>
+                  {gamificationState.dailyXP?.earned || 0}/{gamificationState.dailyXP?.goal || 200}
+                </span>
+              </div>
+              <div className="h-1.5 bg-carbon-700 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    (gamificationState.dailyXP?.earned || 0) >= (gamificationState.dailyXP?.goal || 200)
+                      ? 'bg-gradient-to-r from-green-500 to-emerald-400'
+                      : 'bg-gradient-to-r from-blue-500 to-blue-400'
+                  }`}
+                  style={{ width: `${Math.min(100, ((gamificationState.dailyXP?.earned || 0) / (gamificationState.dailyXP?.goal || 200)) * 100)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Weekly Goal */}
+            <div className="bg-carbon-800/50 rounded-xl p-3">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-1.5">
+                  <TrendingUp size={14} className="text-purple-400" />
+                  <span className="text-xs text-gray-400">Weekly</span>
+                </div>
+                <span className={`text-xs font-semibold ${
+                  (gamificationState.weeklyXP?.earned || 0) >= (gamificationState.weeklyXP?.goal || 1000)
+                    ? 'text-green-400' : 'text-gray-400'
+                }`}>
+                  {gamificationState.weeklyXP?.earned || 0}/{gamificationState.weeklyXP?.goal || 1000}
+                </span>
+              </div>
+              <div className="h-1.5 bg-carbon-700 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    (gamificationState.weeklyXP?.earned || 0) >= (gamificationState.weeklyXP?.goal || 1000)
+                      ? 'bg-gradient-to-r from-green-500 to-emerald-400'
+                      : 'bg-gradient-to-r from-purple-500 to-purple-400'
+                  }`}
+                  style={{ width: `${Math.min(100, ((gamificationState.weeklyXP?.earned || 0) / (gamificationState.weeklyXP?.goal || 1000)) * 100)}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </SlideIn>
+
+        {/* Streak Warning or Milestone */}
+        {streakStatus.atRisk && (
+          <SlideIn delay={85}>
+            <div className="mt-3 bg-orange-500/10 border border-orange-500/30 rounded-xl p-3 flex items-center gap-3">
+              <Flame className="text-orange-400 flex-shrink-0" size={20} />
+              <div>
+                <p className="text-orange-400 font-semibold text-sm">Streak at risk!</p>
+                <p className="text-gray-400 text-xs">Complete a workout today to keep your {streakStatus.currentStreak}-day streak alive</p>
+              </div>
+            </div>
+          </SlideIn>
+        )}
+
+        {streakStatus.nextMilestone && !streakStatus.atRisk && streakStatus.daysToNextMilestone <= 3 && (
+          <SlideIn delay={85}>
+            <div className="mt-3 bg-gold-500/10 border border-gold-500/30 rounded-xl p-3 flex items-center gap-3">
+              <Trophy className="text-gold-400 flex-shrink-0" size={20} />
+              <div>
+                <p className="text-gold-400 font-semibold text-sm">{streakStatus.daysToNextMilestone} days to {streakStatus.nextMilestone.name}!</p>
+                <p className="text-gray-400 text-xs">Keep going for +{streakStatus.nextMilestone.xp} XP bonus</p>
+              </div>
+            </div>
+          </SlideIn>
+        )}
 
         <SlideIn delay={100}>
           <div className="mt-4">
