@@ -1027,7 +1027,7 @@ const ClientOptionsMenu = ({ client, onClose, onMessage, onAssignProgram, onView
 };
 
 // Main Coach Dashboard
-const CoachDashboard = () => {
+const CoachDashboard = ({ onNavigate }) => {
   const [selectedClient, setSelectedClient] = useState(null);
   const [clients, setClients] = useState(defaultClients);
   const [recentWorkouts, setRecentWorkouts] = useState([]);
@@ -1038,6 +1038,8 @@ const CoachDashboard = () => {
   const [messageClient, setMessageClient] = useState(null);
   const [assignProgramClient, setAssignProgramClient] = useState(null);
   const [optionsMenuClient, setOptionsMenuClient] = useState(null);
+  const [showWorkoutsSummary, setShowWorkoutsSummary] = useState(false);
+  const [filterNeedsAttention, setFilterNeedsAttention] = useState(false);
 
   // Track which quick messages have been sent (for inline confirmation)
   const [sentMessages, setSentMessages] = useState({});
@@ -1109,27 +1111,38 @@ const CoachDashboard = () => {
         </div>
 
         <div className="grid grid-cols-3 gap-3 mb-8">
-          <div className="bg-carbon-800/50 rounded-2xl p-4 text-center">
+          <button
+            onClick={() => setShowWorkoutsSummary(true)}
+            className="bg-carbon-800/50 rounded-2xl p-4 text-center hover:bg-carbon-700/50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+          >
             <BarChart3 className="text-blue-400 mx-auto mb-2" size={28} aria-hidden="true" />
             <p className="text-3xl font-black text-white" style={{ fontFamily: 'Oswald, sans-serif' }}>
               18/24
             </p>
             <p className="text-gray-400 text-xs">Workouts Done</p>
-          </div>
-          <div className="bg-carbon-800/50 rounded-2xl p-4 text-center">
+          </button>
+          <button
+            onClick={() => onNavigate && onNavigate('formchecks')}
+            className="bg-carbon-800/50 rounded-2xl p-4 text-center hover:bg-carbon-700/50 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-400"
+          >
             <Video className="text-purple-400 mx-auto mb-2" size={28} aria-hidden="true" />
             <p className="text-3xl font-black text-white" style={{ fontFamily: 'Oswald, sans-serif' }}>
               5
             </p>
             <p className="text-gray-400 text-xs">Form Checks</p>
-          </div>
-          <div className="bg-carbon-800/50 rounded-2xl p-4 text-center">
+          </button>
+          <button
+            onClick={() => setFilterNeedsAttention(!filterNeedsAttention)}
+            className={`rounded-2xl p-4 text-center transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
+              filterNeedsAttention ? 'bg-yellow-500/20 ring-2 ring-yellow-500/50' : 'bg-carbon-800/50 hover:bg-carbon-700/50'
+            }`}
+          >
             <AlertTriangle className="text-yellow-400 mx-auto mb-2" size={28} aria-hidden="true" />
             <p className="text-3xl font-black text-white" style={{ fontFamily: 'Oswald, sans-serif' }}>
               3
             </p>
             <p className="text-gray-400 text-xs">Need Attention</p>
-          </div>
+          </button>
         </div>
 
         <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-5 mb-6">
@@ -1299,7 +1312,7 @@ const CoachDashboard = () => {
                 name: 'Alex R.',
                 clientId: null,
                 actionText: null,
-                actionLink: { type: 'message', label: 'sent a message' },
+                actionLink: { type: 'message', label: 'sent a message', preview: 'Hey coach, quick question about my squat form...' },
                 time: '1 hour ago'
               },
               {
@@ -1373,7 +1386,17 @@ const CoachDashboard = () => {
 
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-white font-bold">ALL CLIENTS</h2>
+            <h2 className="text-white font-bold">
+              {filterNeedsAttention ? 'CLIENTS NEEDING ATTENTION' : 'ALL CLIENTS'}
+              {filterNeedsAttention && (
+                <button
+                  onClick={() => setFilterNeedsAttention(false)}
+                  className="ml-2 text-xs text-gray-400 hover:text-white"
+                >
+                  (show all)
+                </button>
+              )}
+            </h2>
             <div className="flex gap-2">
               <button
                 onClick={() => setShowAddClient(true)}
@@ -1386,7 +1409,9 @@ const CoachDashboard = () => {
           </div>
 
           <div className="space-y-3">
-            {clients.map((client) => (
+            {clients
+              .filter(client => filterNeedsAttention ? (client.status === 'alert' || client.status === 'watch') : true)
+              .map((client) => (
               <button
                 key={client.id}
                 onClick={() => setSelectedClient(client)}
@@ -1475,6 +1500,93 @@ const CoachDashboard = () => {
             setSelectedClient(optionsMenuClient);
           }}
         />
+      )}
+
+      {/* Workouts Summary Modal */}
+      {showWorkoutsSummary && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+          <div className="bg-carbon-800 rounded-3xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-white">Today's Workouts</h3>
+              <button
+                onClick={() => setShowWorkoutsSummary(false)}
+                className="p-2 hover:bg-carbon-700 rounded-xl"
+              >
+                <X className="text-gray-400" size={20} />
+              </button>
+            </div>
+
+            <div className="text-center mb-6">
+              <p className="text-5xl font-black text-gold-400" style={{ fontFamily: 'Oswald, sans-serif' }}>18/24</p>
+              <p className="text-gray-400 text-sm">Workouts Completed</p>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Completed Today</p>
+              {[
+                { name: 'John D.', workout: 'Week 3 Day 2', time: '2 min ago' },
+                { name: 'Emma S.', workout: 'Week 4 Day 1', time: '1 hr ago' },
+                { name: 'Maria L.', workout: 'Week 2 Day 3', time: '3 hrs ago' },
+              ].map((item, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    const client = clients.find(c => c.name.includes(item.name.split(' ')[0]));
+                    if (client) {
+                      setShowWorkoutsSummary(false);
+                      setSelectedClient(client);
+                    }
+                  }}
+                  className="w-full flex items-center justify-between p-3 bg-carbon-900/50 rounded-xl hover:bg-carbon-700 transition-colors text-left"
+                >
+                  <div>
+                    <p className="text-white font-medium">{item.name}</p>
+                    <p className="text-gray-500 text-sm">{item.workout}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500 text-xs">{item.time}</span>
+                    <Check className="text-green-400" size={16} />
+                  </div>
+                </button>
+              ))}
+
+              <p className="text-gray-400 text-xs uppercase tracking-wider mt-4 mb-2">Pending Today</p>
+              {[
+                { name: 'Sarah M.', workout: 'Week 1 Day 4', status: 'alert' },
+                { name: 'Jake T.', workout: 'Week 3 Day 1', status: 'watch' },
+              ].map((item, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    const client = clients.find(c => c.name.includes(item.name.split(' ')[0]));
+                    if (client) {
+                      setShowWorkoutsSummary(false);
+                      setMessageClient(client);
+                    }
+                  }}
+                  className="w-full flex items-center justify-between p-3 bg-carbon-900/50 rounded-xl hover:bg-carbon-700 transition-colors text-left"
+                >
+                  <div>
+                    <p className="text-white font-medium">{item.name}</p>
+                    <p className="text-gray-500 text-sm">{item.workout}</p>
+                  </div>
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    item.status === 'alert' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'
+                  }`}>
+                    {item.status === 'alert' ? 'Overdue' : 'Scheduled'}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setShowWorkoutsSummary(false)}
+              className="w-full mt-6 bg-carbon-700 text-white font-semibold py-3 rounded-xl hover:bg-carbon-600"
+            >
+              Close
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

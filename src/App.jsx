@@ -117,7 +117,7 @@ const AppContent = () => {
 
     // Coach views (dashboard is default)
     if (userRole === 'coach') {
-      return <CoachDashboard />;
+      return <CoachDashboard onNavigate={setActiveTab} />;
     }
 
     // Athlete views
