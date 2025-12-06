@@ -2,6 +2,7 @@
 import { BADGES, calculateXP, getLevelFromXP, getXPProgress, getCurrentWeeklyChallenge, rollDailyBonus } from '../data/gamification';
 
 const STORAGE_KEY = 'sts_gamification';
+const CHALLENGE_LOG_KEY = 'sts_challenge_log';
 
 // Get gamification state from localStorage
 const getState = () => {
@@ -385,6 +386,132 @@ export const initializeDemoGamification = () => {
 // Call initialize on import
 initializeDemoGamification();
 
+// Get week start date for challenge log filtering
+const getChallengeWeekStart = () => {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+  const weekStart = new Date(now);
+  weekStart.setDate(diff);
+  weekStart.setHours(0, 0, 0, 0);
+  return weekStart.toISOString();
+};
+
+// Get challenge log from localStorage
+const getChallengeLog = () => {
+  try {
+    const stored = localStorage.getItem(CHALLENGE_LOG_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch {
+    // Return empty array if localStorage fails
+  }
+  return [];
+};
+
+// Save challenge log to localStorage
+const saveChallengeLog = (log) => {
+  try {
+    localStorage.setItem(CHALLENGE_LOG_KEY, JSON.stringify(log));
+  } catch {
+    // Silently fail if localStorage unavailable
+  }
+};
+
+// Record a challenge exercise and award XP
+export const recordChallengeExercise = (challengeId, exerciseData) => {
+  const state = getState();
+  const log = getChallengeLog();
+
+  // Add exercise to log
+  const logEntry = {
+    ...exerciseData,
+    challengeId,
+    weekStart: getChallengeWeekStart(),
+  };
+  log.push(logEntry);
+  saveChallengeLog(log);
+
+  // Update challenge progress (add sets to progress)
+  const currentChallenge = getCurrentWeeklyChallenge();
+  const weekStart = getWeekStart();
+
+  if (state.weeklyChallenge.weekStart !== weekStart) {
+    // New week, reset challenge
+    state.weeklyChallenge = {
+      id: currentChallenge.id,
+      progress: 0,
+      completed: false,
+      weekStart,
+    };
+  }
+
+  // Add sets to progress for applicable challenge types
+  const setsToAdd = exerciseData.sets || 0;
+  const volumeToAdd = exerciseData.volume || 0;
+
+  if (['upper_body', 'leg_day', 'compound_king', 'set_crusher'].includes(challengeId)) {
+    state.weeklyChallenge.progress += setsToAdd;
+  } else if (challengeId === 'volume_boost') {
+    state.weeklyChallenge.progress += volumeToAdd;
+  }
+
+  // Track exercise sets for mastery badges
+  if (!state.stats.exerciseSets) state.stats.exerciseSets = {};
+  state.stats.exerciseSets[exerciseData.exerciseName] =
+    (state.stats.exerciseSets[exerciseData.exerciseName] || 0) + setsToAdd;
+
+  // Update total sets and volume
+  state.stats.totalSets += setsToAdd;
+  state.stats.totalVolume += volumeToAdd;
+
+  // Award XP for logging exercise (5 XP per set)
+  const xpPerSet = 5;
+  const baseXP = setsToAdd * xpPerSet;
+  const multiplier = state.dailyBonus?.multiplier || 1;
+  const xpGained = Math.round(baseXP * multiplier);
+
+  state.xp += xpGained;
+  state.totalXP += xpGained;
+
+  // Check if challenge completed
+  let challengeCompleted = false;
+  if (state.weeklyChallenge.progress >= currentChallenge.target && !state.weeklyChallenge.completed) {
+    state.weeklyChallenge.completed = true;
+    state.xp += currentChallenge.xpReward;
+    state.totalXP += currentChallenge.xpReward;
+    challengeCompleted = true;
+  }
+
+  saveState(state);
+
+  // Check for new badges
+  const newBadges = checkBadges();
+
+  return {
+    xpGained: challengeCompleted ? xpGained + currentChallenge.xpReward : xpGained,
+    totalXP: state.xp,
+    level: getLevelFromXP(state.xp),
+    newProgress: state.weeklyChallenge.progress,
+    challengeCompleted,
+    newBadges,
+  };
+};
+
+// Get logged exercises for current week's challenge
+export const getWeeklyChallengeLog = () => {
+  const log = getChallengeLog();
+  const weekStart = getChallengeWeekStart();
+
+  // Filter to current week's entries
+  return log.filter(entry => {
+    const entryDate = new Date(entry.timestamp);
+    const weekStartDate = new Date(weekStart);
+    return entryDate >= weekStartDate;
+  });
+};
+
 export default {
   addXP,
   checkBadges,
@@ -396,4 +523,6 @@ export default {
   recordTutorialWatched,
   checkDailyBonus,
   getGamificationState,
+  recordChallengeExercise,
+  getWeeklyChallengeLog,
 };
