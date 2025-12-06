@@ -850,6 +850,199 @@ export const exerciseDatabase = {
     ],
     xpValue: 8
   },
+
+  // === WARMUP EXERCISES ===
+  'Ankle Stretch w/ KB': {
+    id: 'ankle-stretch-kb',
+    name: 'Ankle Stretch w/ KB',
+    category: 'warmup',
+    equipment: ['kettlebell'],
+    primaryMuscles: ['calves'],
+    secondaryMuscles: ['ankles'],
+    difficulty: 'beginner',
+    videoId: 'IikP_teeLkI',
+    alternativeVideos: [
+      { id: 'XISJxsccN1E', channel: 'Squat University', title: 'Ankle Mobility' },
+    ],
+    instructions: [
+      'Hold a kettlebell in front of you for balance',
+      'Step one foot forward into a deep lunge position',
+      'Drive your knee forward over your toes while keeping heel down',
+      'Hold for 30 seconds, then switch sides'
+    ],
+    tips: ['Keep heel firmly planted', 'Use weight to help drive knee forward'],
+    xpValue: 3
+  },
+
+  '90/90 Breathing': {
+    id: '90-90-breathing',
+    name: '90/90 Breathing',
+    category: 'warmup',
+    equipment: ['wall', 'box'],
+    primaryMuscles: ['core'],
+    secondaryMuscles: ['diaphragm'],
+    difficulty: 'beginner',
+    videoId: 'uA2IxmMqE0M',
+    alternativeVideos: [
+      { id: 'YtNHpWW6qbI', channel: 'Postural Restoration', title: '90/90 Hip Lift' },
+    ],
+    instructions: [
+      'Lie on your back with hips and knees at 90 degrees',
+      'Feet on a wall or box',
+      'Exhale fully and tuck your pelvis',
+      'Inhale deeply through your nose focusing on rib expansion',
+      'Perform 10 breaths'
+    ],
+    tips: ['Feel your low back press into the floor', 'Breathe into your sides and back'],
+    xpValue: 3
+  },
+
+  'T-Spine Rotation': {
+    id: 't-spine-rotation',
+    name: 'T-Spine Rotation',
+    category: 'warmup',
+    equipment: ['none'],
+    primaryMuscles: ['upper back'],
+    secondaryMuscles: ['core'],
+    difficulty: 'beginner',
+    videoId: 'gHTE5SaKQkY',
+    alternativeVideos: [
+      { id: 'MQG3sWIJVl8', channel: 'FitnessFAQs', title: 'Thoracic Mobility' },
+    ],
+    instructions: [
+      'Start on all fours, place one hand behind your head',
+      'Rotate your elbow toward the opposite arm',
+      'Then rotate up toward the ceiling',
+      'Keep hips square and move from mid-back only',
+      'Perform 10 reps each side'
+    ],
+    tips: ['Move slowly and controlled', 'Follow your elbow with your eyes'],
+    xpValue: 3
+  },
+
+  'World\'s Greatest Stretch': {
+    id: 'worlds-greatest-stretch',
+    name: 'World\'s Greatest Stretch',
+    category: 'warmup',
+    equipment: ['none'],
+    primaryMuscles: ['hip flexors', 'hamstrings'],
+    secondaryMuscles: ['upper back', 'glutes'],
+    difficulty: 'beginner',
+    videoId: 'S5HcDJT9yMI',
+    alternativeVideos: [],
+    instructions: [
+      'Step into a deep lunge position',
+      'Place both hands inside your front foot',
+      'Rotate your torso and reach to the ceiling',
+      'Return and repeat on other side'
+    ],
+    tips: ['Keep back leg straight', 'Drive hip toward floor'],
+    xpValue: 3
+  },
+
+  'Cat-Cow': {
+    id: 'cat-cow',
+    name: 'Cat-Cow',
+    category: 'warmup',
+    equipment: ['none'],
+    primaryMuscles: ['spine'],
+    secondaryMuscles: ['core'],
+    difficulty: 'beginner',
+    videoId: 'kqnua4rHVVA',
+    alternativeVideos: [],
+    instructions: [
+      'Start on all fours, hands under shoulders, knees under hips',
+      'Inhale: arch your back, lift chest and tailbone (Cow)',
+      'Exhale: round your spine, tuck chin and tailbone (Cat)',
+      'Flow between positions with breath'
+    ],
+    tips: ['Move with your breath', 'Feel each vertebra move'],
+    xpValue: 3
+  },
+
+  // === FINISHER EXERCISES ===
+  'Assisted Hip Airplanes': {
+    id: 'hip-airplanes',
+    name: 'Assisted Hip Airplanes',
+    category: 'finisher',
+    equipment: ['wall', 'pole'],
+    primaryMuscles: ['glutes'],
+    secondaryMuscles: ['hip rotators', 'core'],
+    difficulty: 'intermediate',
+    videoId: 'FyJMSP2n53Q',
+    alternativeVideos: [],
+    instructions: [
+      'Stand on one leg, holding a wall or pole for support',
+      'Hinge at the hip, extending free leg behind you',
+      'Rotate your hips open and closed while maintaining balance',
+      'Keep standing leg slightly bent'
+    ],
+    tips: ['Move slowly and controlled', 'Focus on hip rotation not trunk rotation'],
+    xpValue: 5
+  },
+
+  'Rolling Plank': {
+    id: 'rolling-plank',
+    name: 'Rolling Plank',
+    category: 'finisher',
+    equipment: ['none'],
+    primaryMuscles: ['core'],
+    secondaryMuscles: ['shoulders', 'obliques'],
+    difficulty: 'intermediate',
+    videoId: 'Oyw9O7K_1tQ',
+    alternativeVideos: [],
+    instructions: [
+      'Start in a forearm plank position',
+      'Rotate to side plank on one arm',
+      'Return to center, then rotate to other side',
+      'Keep hips level throughout'
+    ],
+    tips: ['Don\'t let hips sag', 'Stack feet or stagger for stability'],
+    xpValue: 5
+  },
+
+  'Dead Bug': {
+    id: 'dead-bug',
+    name: 'Dead Bug',
+    category: 'finisher',
+    equipment: ['none'],
+    primaryMuscles: ['core'],
+    secondaryMuscles: ['hip flexors'],
+    difficulty: 'beginner',
+    videoId: 'g_BYB0R-4Ws',
+    alternativeVideos: [
+      { id: 'I5xbsA71vxE', channel: 'Squat University', title: 'Dead Bug Progression' },
+    ],
+    instructions: [
+      'Lie on your back, arms pointing to ceiling',
+      'Lift legs to 90 degrees at hips and knees',
+      'Lower opposite arm and leg toward floor',
+      'Return and repeat with other side',
+      'Keep lower back pressed into floor'
+    ],
+    tips: ['Exhale as you extend', 'Only go as far as you can maintain back position'],
+    xpValue: 5
+  },
+
+  'Bird Dog': {
+    id: 'bird-dog',
+    name: 'Bird Dog',
+    category: 'finisher',
+    equipment: ['none'],
+    primaryMuscles: ['core', 'lower back'],
+    secondaryMuscles: ['glutes', 'shoulders'],
+    difficulty: 'beginner',
+    videoId: 'wiFNA3sqjCA',
+    alternativeVideos: [],
+    instructions: [
+      'Start on all fours, hands under shoulders, knees under hips',
+      'Extend opposite arm and leg simultaneously',
+      'Hold for 2 seconds at full extension',
+      'Return and repeat with other side'
+    ],
+    tips: ['Keep hips level', 'Think about pushing heel back not up'],
+    xpValue: 5
+  },
 };
 
 // Get exercise by name (case-insensitive)

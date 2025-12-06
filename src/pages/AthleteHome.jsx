@@ -18,7 +18,7 @@ const AthleteHome = ({ onStartWorkout, userName = 'Dadward' }) => {
 
   return (
   <PageTransition>
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-32">
       <header className="p-6">
         <SlideIn direction="down" delay={0}>
           <div className="flex items-center justify-between mb-6">

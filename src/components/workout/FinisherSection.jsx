@@ -1,8 +1,53 @@
 import { useState } from 'react';
-import { Check, Info, Play, Star, ChevronDown, ChevronUp } from 'lucide-react';
+import { Check, Info, Play, Star, ChevronDown, ChevronUp, X } from 'lucide-react';
 import VideoModal from './VideoModal';
 
-const FinisherExercise = ({ exercise, index, isComplete, onToggleComplete, onShowVideo }) => {
+// Exercise Info Modal for Finishers
+const FinisherInfoModal = ({ exercise, onClose }) => {
+  return (
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+      <div className="bg-carbon-800 rounded-3xl p-6 max-w-md w-full">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Star className="text-gold-400" size={20} />
+            <h3 className="text-lg font-bold text-white">{exercise.name}</h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-carbon-700 rounded-xl transition-colors"
+          >
+            <X className="text-gray-400" size={20} />
+          </button>
+        </div>
+
+        {exercise.focus && (
+          <span className="inline-block px-3 py-1 bg-gold-500/20 text-gold-400 text-xs font-semibold rounded-full mb-3">
+            {exercise.focus}
+          </span>
+        )}
+
+        <div className="bg-carbon-900/50 rounded-xl p-4 mb-4">
+          <p className="text-gold-400 font-mono text-lg">{exercise.prescription}</p>
+        </div>
+
+        {exercise.description ? (
+          <p className="text-gray-300 leading-relaxed">{exercise.description}</p>
+        ) : (
+          <p className="text-gray-500 italic">No description available for this exercise.</p>
+        )}
+
+        <button
+          onClick={onClose}
+          className="w-full mt-6 bg-carbon-700 text-white font-semibold py-3 rounded-xl hover:bg-carbon-600 transition-colors"
+        >
+          Got it
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const FinisherExercise = ({ exercise, index, isComplete, onToggleComplete, onShowVideo, onShowInfo }) => {
   return (
     <div
       className={`bg-carbon-800/30 rounded-xl p-4 border transition-all ${
@@ -20,20 +65,36 @@ const FinisherExercise = ({ exercise, index, isComplete, onToggleComplete, onSho
             {index}
           </span>
           <div className="flex-1 min-w-0">
-            <h4 className="text-white font-semibold text-sm">{exercise.name}</h4>
+            <div className="flex items-center gap-2">
+              <h4 className="text-white font-semibold text-sm">{exercise.name}</h4>
+              {exercise.focus && (
+                <span className="text-xs text-gray-500">({exercise.focus})</span>
+              )}
+            </div>
             <p className="text-gold-400/80 text-xs">{exercise.prescription}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {exercise.videoId && (
-            <button
-              onClick={() => onShowVideo(exercise.videoId)}
-              className="p-2 bg-carbon-700/50 rounded-lg text-gray-400 hover:text-gold-400 hover:bg-gold-500/10 transition-colors focus:outline-none focus:ring-2 focus:ring-gold-400"
-              aria-label={`Watch demo for ${exercise.name}`}
-            >
-              <Play size={16} />
-            </button>
-          )}
+          {/* Info Button */}
+          <button
+            onClick={() => onShowInfo(exercise)}
+            className="p-2 bg-carbon-700/50 rounded-lg text-gray-400 hover:text-white hover:bg-carbon-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gold-400"
+            aria-label={`Info for ${exercise.name}`}
+          >
+            <Info size={16} />
+          </button>
+          {/* Video Button */}
+          <button
+            onClick={() => onShowVideo(exercise)}
+            className={`p-2 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gold-400 ${
+              exercise.videoId
+                ? 'bg-gold-500/20 text-gold-400 hover:bg-gold-500/30'
+                : 'bg-carbon-700/50 text-gray-500'
+            }`}
+            aria-label={`Watch demo for ${exercise.name}`}
+          >
+            <Play size={16} fill={exercise.videoId ? 'currentColor' : 'none'} />
+          </button>
           <button
             onClick={() => onToggleComplete(exercise.id)}
             className={`w-10 h-10 rounded-xl font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-gold-400 flex items-center justify-center ${
@@ -56,6 +117,7 @@ const FinisherSection = ({ exercises, onComplete }) => {
   const [expanded, setExpanded] = useState(true);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [videoId, setVideoId] = useState(null);
+  const [showInfoExercise, setShowInfoExercise] = useState(null);
 
   const handleToggleComplete = (exerciseId) => {
     setCompletedExercises(prev => {
@@ -71,11 +133,15 @@ const FinisherSection = ({ exercises, onComplete }) => {
     });
   };
 
-  const handleShowVideo = (vid) => {
-    if (vid) {
-      setVideoId(vid);
+  const handleShowVideo = (exercise) => {
+    if (exercise.videoId) {
+      setVideoId(exercise.videoId);
       setShowVideoModal(true);
     }
+  };
+
+  const handleShowInfo = (exercise) => {
+    setShowInfoExercise(exercise);
   };
 
   const allComplete = completedExercises.length === exercises.length;
@@ -142,6 +208,7 @@ const FinisherSection = ({ exercises, onComplete }) => {
                 isComplete={completedExercises.includes(exercise.id)}
                 onToggleComplete={handleToggleComplete}
                 onShowVideo={handleShowVideo}
+                onShowInfo={handleShowInfo}
               />
             ))}
           </div>
@@ -153,6 +220,14 @@ const FinisherSection = ({ exercises, onComplete }) => {
         <VideoModal
           videoId={videoId}
           onClose={() => setShowVideoModal(false)}
+        />
+      )}
+
+      {/* Info Modal */}
+      {showInfoExercise && (
+        <FinisherInfoModal
+          exercise={showInfoExercise}
+          onClose={() => setShowInfoExercise(null)}
         />
       )}
     </>

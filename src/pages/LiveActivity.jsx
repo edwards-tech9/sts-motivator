@@ -83,7 +83,7 @@ const LiveActivity = () => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen pb-24">
+      <div className="min-h-screen pb-32">
         {/* Header */}
         <header className="sticky top-0 z-30 bg-carbon-900/90 backdrop-blur-lg border-b border-slate-800">
           <div className="p-4">

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Flame, ChevronDown, Play, Check, Timer, Pause, RotateCcw } from 'lucide-react';
+import { Flame, ChevronDown, Play, Check, Timer, Pause, RotateCcw, Info, X, Video } from 'lucide-react';
 
 // Parse prescription to get duration in seconds (e.g., "2×30s" -> 60, "2×10 each" -> 60)
 const parseDuration = (prescription) => {
@@ -204,12 +204,106 @@ const WarmupTimerModal = ({ exercise, onComplete, onSkip }) => {
   );
 };
 
+// Exercise Info Modal
+const ExerciseInfoModal = ({ exercise, onClose }) => {
+  return (
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+      <div className="bg-carbon-800 rounded-3xl p-6 max-w-md w-full">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Info className="text-gold-400" size={20} />
+            <h3 className="text-lg font-bold text-white">{exercise.name}</h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-carbon-700 rounded-xl transition-colors"
+          >
+            <X className="text-gray-400" size={20} />
+          </button>
+        </div>
+
+        {exercise.focus && (
+          <span className="inline-block px-3 py-1 bg-gold-500/20 text-gold-400 text-xs font-semibold rounded-full mb-3">
+            {exercise.focus}
+          </span>
+        )}
+
+        <div className="bg-carbon-900/50 rounded-xl p-4 mb-4">
+          <p className="text-gold-400 font-mono text-lg mb-1">{exercise.prescription}</p>
+        </div>
+
+        {exercise.description ? (
+          <p className="text-gray-300 leading-relaxed">{exercise.description}</p>
+        ) : (
+          <p className="text-gray-500 italic">No description available for this exercise.</p>
+        )}
+
+        <button
+          onClick={onClose}
+          className="w-full mt-6 bg-carbon-700 text-white font-semibold py-3 rounded-xl hover:bg-carbon-600 transition-colors"
+        >
+          Got it
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Video Modal
+const VideoModal = ({ exercise, onClose }) => {
+  if (!exercise.videoId) {
+    return (
+      <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+        <div className="bg-carbon-800 rounded-3xl p-6 max-w-md w-full text-center">
+          <Video className="text-gray-600 mx-auto mb-4" size={48} />
+          <h3 className="text-lg font-bold text-white mb-2">No Video Available</h3>
+          <p className="text-gray-400 mb-6">A video demo hasn't been set for this exercise yet.</p>
+          <button
+            onClick={onClose}
+            className="w-full bg-carbon-700 text-white font-semibold py-3 rounded-xl hover:bg-carbon-600 transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-4">
+      <div className="w-full max-w-2xl">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-white font-bold text-lg">{exercise.name}</h3>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-carbon-800 rounded-xl transition-colors"
+          >
+            <X className="text-gray-400" size={24} />
+          </button>
+        </div>
+        <div className="aspect-video bg-black rounded-2xl overflow-hidden">
+          <iframe
+            src={`https://www.youtube.com/embed/${exercise.videoId}?rel=0&autoplay=1`}
+            title={exercise.name}
+            className="w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+        <p className="text-gold-400 text-center mt-4 font-mono">{exercise.prescription}</p>
+      </div>
+    </div>
+  );
+};
+
 // Main Warmup Section
 const WarmupSection = ({ exercises, expanded, onToggle }) => {
   const [warmupStarted, setWarmupStarted] = useState(false);
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [completedExercises, setCompletedExercises] = useState([]);
   const [showTimer, setShowTimer] = useState(false);
+  const [showInfo, setShowInfo] = useState(null);
+  const [showVideo, setShowVideo] = useState(null);
 
   const handleStartWarmup = () => {
     setWarmupStarted(true);
@@ -274,27 +368,62 @@ const WarmupSection = ({ exercises, expanded, onToggle }) => {
             {exercises.map((ex, i) => (
               <div
                 key={i}
-                className={`flex items-center justify-between rounded-xl p-3 transition-colors ${
+                className={`rounded-xl p-3 transition-colors ${
                   completedExercises.includes(i)
                     ? 'bg-green-500/10 border border-green-500/30'
                     : 'bg-carbon-900/50'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  {completedExercises.includes(i) ? (
-                    <Check className="text-green-400" size={18} />
-                  ) : (
-                    <span className="w-5 h-5 rounded-full bg-carbon-700 flex items-center justify-center text-xs text-gray-400">
-                      {i + 1}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {completedExercises.includes(i) ? (
+                      <Check className="text-green-400" size={18} />
+                    ) : (
+                      <span className="w-5 h-5 rounded-full bg-carbon-700 flex items-center justify-center text-xs text-gray-400">
+                        {i + 1}
+                      </span>
+                    )}
+                    <div>
+                      <span className={completedExercises.includes(i) ? 'text-green-400' : 'text-gray-300'}>
+                        {ex.name}
+                      </span>
+                      {ex.focus && (
+                        <span className="ml-2 text-xs text-gray-500">({ex.focus})</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`font-mono text-sm ${completedExercises.includes(i) ? 'text-green-400' : 'text-gold-400'}`}>
+                      {ex.prescription}
                     </span>
-                  )}
-                  <span className={completedExercises.includes(i) ? 'text-green-400' : 'text-gray-300'}>
-                    {ex.name}
-                  </span>
+                    {/* Info Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowInfo(ex);
+                      }}
+                      className="p-1.5 rounded-lg bg-carbon-700 hover:bg-carbon-600 transition-colors"
+                      aria-label={`Info for ${ex.name}`}
+                    >
+                      <Info size={14} className="text-gray-400" />
+                    </button>
+                    {/* Video Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowVideo(ex);
+                      }}
+                      className={`p-1.5 rounded-lg transition-colors ${
+                        ex.videoId
+                          ? 'bg-gold-500/20 hover:bg-gold-500/30'
+                          : 'bg-carbon-700 hover:bg-carbon-600'
+                      }`}
+                      aria-label={`Video for ${ex.name}`}
+                    >
+                      <Play size={14} className={ex.videoId ? 'text-gold-400' : 'text-gray-500'} fill={ex.videoId ? 'currentColor' : 'none'} />
+                    </button>
+                  </div>
                 </div>
-                <span className={`font-mono ${completedExercises.includes(i) ? 'text-green-400' : 'text-gold-400'}`}>
-                  {ex.prescription}
-                </span>
               </div>
             ))}
 
@@ -322,6 +451,22 @@ const WarmupSection = ({ exercises, expanded, onToggle }) => {
           exercise={exercises[currentExerciseIndex]}
           onComplete={handleCompleteExercise}
           onSkip={handleSkipExercise}
+        />
+      )}
+
+      {/* Info Modal */}
+      {showInfo && (
+        <ExerciseInfoModal
+          exercise={showInfo}
+          onClose={() => setShowInfo(null)}
+        />
+      )}
+
+      {/* Video Modal */}
+      {showVideo && (
+        <VideoModal
+          exercise={showVideo}
+          onClose={() => setShowVideo(null)}
         />
       )}
     </>

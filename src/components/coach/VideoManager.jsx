@@ -3,9 +3,20 @@ import { X, Search, Play, Check, RefreshCw, ExternalLink, Video, Trash2, Plus, C
 import { exerciseDatabase, getAllExercises, searchExercises } from '../../data/exercises';
 import { getExerciseVideos, saveExerciseVideo, getExerciseVideo } from '../../services/localStorage';
 
+// Exercise type/category definitions
+const EXERCISE_TYPES = [
+  { id: 'all', label: 'All' },
+  { id: 'warmup', label: 'Warmup' },
+  { id: 'compound', label: 'Compound' },
+  { id: 'isolation', label: 'Isolation' },
+  { id: 'accessory', label: 'Accessory' },
+  { id: 'finisher', label: 'Finisher' },
+];
+
 const VideoManager = ({ isOpen, onClose }) => {
   const [exercises, setExercises] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [customVideoId, setCustomVideoId] = useState('');
   const [expandedExercise, setExpandedExercise] = useState(null);
@@ -21,12 +32,23 @@ const VideoManager = ({ isOpen, onClose }) => {
   }, [isOpen]);
 
   useEffect(() => {
+    let filtered = getAllExercises();
+
+    // Apply search filter
     if (searchQuery) {
-      setExercises(searchExercises(searchQuery));
-    } else {
-      setExercises(getAllExercises());
+      filtered = searchExercises(searchQuery);
     }
-  }, [searchQuery]);
+
+    // Apply type filter
+    if (typeFilter !== 'all') {
+      filtered = filtered.filter(ex =>
+        ex.category?.toLowerCase() === typeFilter.toLowerCase() ||
+        ex.type?.toLowerCase() === typeFilter.toLowerCase()
+      );
+    }
+
+    setExercises(filtered);
+  }, [searchQuery, typeFilter]);
 
   const handleSelectVideo = (exerciseName, videoId, source = 'library') => {
     saveExerciseVideo(exerciseName, {
@@ -107,7 +129,7 @@ const VideoManager = ({ isOpen, onClose }) => {
           </div>
 
           {/* Search */}
-          <div className="relative">
+          <div className="relative mb-4">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
             <input
               type="text"
@@ -116,6 +138,23 @@ const VideoManager = ({ isOpen, onClose }) => {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-carbon-800 border border-carbon-700 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:border-gold-500/50"
             />
+          </div>
+
+          {/* Type Filter Tabs */}
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {EXERCISE_TYPES.map((type) => (
+              <button
+                key={type.id}
+                onClick={() => setTypeFilter(type.id)}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
+                  typeFilter === type.id
+                    ? 'bg-gold-gradient text-carbon-900'
+                    : 'bg-carbon-800 text-gray-400 hover:bg-carbon-700'
+                }`}
+              >
+                {type.label}
+              </button>
+            ))}
           </div>
         </div>
 

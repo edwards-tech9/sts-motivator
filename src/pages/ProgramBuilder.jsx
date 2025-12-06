@@ -222,7 +222,7 @@ const ProgramBuilder = () => {
   };
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-32">
       <header className="sticky top-0 z-30 bg-carbon-900/90 backdrop-blur-lg border-b border-slate-800">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">

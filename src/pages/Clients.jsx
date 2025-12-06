@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Filter, ChevronRight, MessageSquare, Clipboard, BarChart3, MoreVertical, X, UserPlus, Users, TrendingUp, AlertTriangle, CreditCard, DollarSign, Settings } from 'lucide-react';
+import { Search, Plus, Filter, ChevronRight, MessageSquare, Clipboard, BarChart3, MoreVertical, X, UserPlus, Users, TrendingUp, AlertTriangle, CreditCard, DollarSign, Settings, Sparkles, Send } from 'lucide-react';
 import { PageTransition, SlideIn, StaggerContainer } from '../components/ui/AnimatedComponents';
 import { getAthletes, saveAthlete, addMessage } from '../services/localStorage';
 import {
@@ -43,6 +43,22 @@ const getStatusLabel = (status) => {
 // Client Detail Modal
 const ClientDetailModal = ({ client, onClose, onMessage, onAssignProgram }) => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [coachingTipsExpanded, setCoachingTipsExpanded] = useState(true);
+
+  // Generate smart, psychology-driven coaching suggestions
+  const coachingTips = generateSmartMessages(client.id, client.name, {
+    goal: client.goal,
+    level: client.level,
+    status: client.status,
+  });
+
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'high': return { border: 'border-l-red-500', bg: 'bg-red-500/5', dot: 'bg-red-400' };
+      case 'medium': return { border: 'border-l-yellow-500', bg: 'bg-yellow-500/5', dot: 'bg-yellow-400' };
+      default: return { border: 'border-l-blue-500', bg: 'bg-blue-500/5', dot: 'bg-blue-400' };
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/90 z-50 overflow-y-auto">
@@ -112,6 +128,55 @@ const ClientDetailModal = ({ client, onClose, onMessage, onAssignProgram }) => {
               <p className="text-gray-500 text-xs">PRs</p>
             </div>
           </div>
+
+          {/* Coaching Tips - Smart AI-Generated Suggestions */}
+          {coachingTips.length > 0 && (
+            <div className="bg-gradient-to-r from-gold-500/10 to-gold-400/5 border border-gold-500/20 rounded-2xl mb-6 overflow-hidden">
+              <button
+                onClick={() => setCoachingTipsExpanded(!coachingTipsExpanded)}
+                className="w-full flex items-center justify-between p-4 hover:bg-gold-500/5 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <Sparkles className="text-gold-400" size={18} />
+                  <span className="text-gold-400 font-bold text-sm tracking-wider">COACHING TIPS</span>
+                  <span className="text-gray-500 text-xs">What to say to {client.name.split(' ')[0]}</span>
+                </div>
+                <ChevronRight
+                  size={18}
+                  className={`text-gold-400 transition-transform ${coachingTipsExpanded ? 'rotate-90' : ''}`}
+                />
+              </button>
+              {coachingTipsExpanded && (
+                <div className="px-4 pb-4 space-y-2">
+                  <p className="text-gray-400 text-xs mb-2">
+                    Help {client.name.split(' ')[0]} MAKE GAINS:
+                  </p>
+                  {coachingTips.map((tip, i) => {
+                    const colors = getPriorityColor(tip.priority);
+                    return (
+                      <div
+                        key={i}
+                        className={`p-3 rounded-xl border-l-2 ${colors.border} ${colors.bg}`}
+                      >
+                        <p className="text-gray-200 text-sm leading-relaxed">{tip.message}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className={`w-2 h-2 rounded-full ${colors.dot}`} />
+                          <p className="text-gray-500 text-xs">{tip.reason}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <button
+                    onClick={() => onMessage(client)}
+                    className="w-full mt-3 flex items-center justify-center gap-2 bg-gold-500/20 hover:bg-gold-500/30 text-gold-400 font-semibold py-3 rounded-xl transition-colors"
+                  >
+                    <Send size={16} />
+                    Send Message Now
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Tabs */}
           <div className="flex gap-2 mb-6 overflow-x-auto">
@@ -851,7 +916,7 @@ const Clients = () => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen pb-24">
+      <div className="min-h-screen pb-32">
         {/* Header */}
         <header className="sticky top-0 z-30 bg-carbon-900/90 backdrop-blur-lg border-b border-slate-800">
           <div className="p-4">

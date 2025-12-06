@@ -166,7 +166,7 @@ const WorkoutHistory = () => {
   const avgDuration = thisMonthWorkouts.length > 0 ? Math.round(thisMonthWorkouts.reduce((acc, w) => acc + w.duration, 0) / thisMonthWorkouts.length) : 0;
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-32">
       <header className="sticky top-0 z-30 bg-carbon-900/90 backdrop-blur-lg border-b border-slate-800">
         <div className="p-4 flex items-center gap-3">
           <img src="/logo.png" alt="STS" className="w-10 h-10 object-contain" />

@@ -314,6 +314,14 @@ const ClientDetailView = ({ client, onBack, onMessage, onShowOptions }) => {
   const [showLocalMessage, setShowLocalMessage] = useState(false);
   const [showLocalOptions, setShowLocalOptions] = useState(false);
   const [pushSuccess, setPushSuccess] = useState(false);
+  const [coachingTipsExpanded, setCoachingTipsExpanded] = useState(true);
+
+  // Generate smart, psychology-driven coaching suggestions
+  const coachingTips = generateSmartMessages(client.id, client.name, {
+    goal: client.goal,
+    level: client.level,
+    status: client.status,
+  });
 
   // Sample program day for demo
   const sampleProgramDay = {
@@ -331,7 +339,7 @@ const ClientDetailView = ({ client, onBack, onMessage, onShowOptions }) => {
   };
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-32">
       <header className="sticky top-0 z-30 bg-carbon-900/90 backdrop-blur-lg border-b border-slate-800">
         <div className="flex items-center justify-between p-4">
           <button
@@ -418,6 +426,93 @@ const ClientDetailView = ({ client, onBack, onMessage, onShowOptions }) => {
             <p className="text-2xl font-black text-white" style={{ fontFamily: 'Oswald, sans-serif' }}>W3</p>
             <p className="text-gray-500 text-xs">Current</p>
           </div>
+          <div className="bg-carbon-800/50 rounded-xl p-3 text-center">
+            <p className="text-2xl font-black text-gold-400" style={{ fontFamily: 'Oswald, sans-serif' }}>{client.prs}</p>
+            <p className="text-gray-500 text-xs">PRs</p>
+          </div>
+          <div className="bg-carbon-800/50 rounded-xl p-3 text-center">
+            <p className="text-2xl font-black text-white" style={{ fontFamily: 'Oswald, sans-serif' }}>{client.gained}</p>
+            <p className="text-gray-500 text-xs">Gained</p>
+          </div>
+        </div>
+
+        {/* Coaching Tips - Smart AI-Generated Suggestions */}
+        <div className="bg-gradient-to-r from-gold-500/10 to-gold-400/5 border border-gold-500/20 rounded-2xl mb-6 overflow-hidden">
+          <button
+            onClick={() => setCoachingTipsExpanded(!coachingTipsExpanded)}
+            className="w-full flex items-center justify-between p-4"
+          >
+            <div className="flex items-center gap-2">
+              <Sparkles className="text-gold-400" size={18} />
+              <span className="text-gold-400 font-bold text-sm tracking-wider">COACHING TIPS</span>
+              <span className="text-gray-500 text-xs ml-2">Based on {client.name.split(' ')[0]}'s data</span>
+            </div>
+            <ChevronRight
+              size={18}
+              className={`text-gold-400 transition-transform ${coachingTipsExpanded ? 'rotate-90' : ''}`}
+            />
+          </button>
+
+          {coachingTipsExpanded && (
+            <div className="px-4 pb-4 space-y-2">
+              <p className="text-gray-400 text-xs mb-3">
+                What to say to help {client.name.split(' ')[0]} MAKE GAINS:
+              </p>
+              {coachingTips.map((tip, i) => (
+                <div
+                  key={i}
+                  className={`p-3 rounded-xl border-l-2 ${
+                    tip.priority === 'high'
+                      ? 'border-l-red-500 bg-red-500/5'
+                      : tip.priority === 'medium'
+                      ? 'border-l-yellow-500 bg-yellow-500/5'
+                      : 'border-l-blue-500 bg-blue-500/5'
+                  }`}
+                >
+                  <p className="text-gray-200 text-sm leading-relaxed">{tip.message}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        tip.priority === 'high'
+                          ? 'bg-red-500'
+                          : tip.priority === 'medium'
+                          ? 'bg-yellow-500'
+                          : 'bg-blue-500'
+                      }`}
+                    />
+                    <p className="text-gray-500 text-xs">{tip.reason}</p>
+                  </div>
+                </div>
+              ))}
+              <button
+                onClick={() => setShowLocalMessage(true)}
+                className="w-full mt-3 bg-gold-gradient text-carbon-900 font-bold py-2 rounded-xl text-sm hover:scale-[1.02] transition-transform flex items-center justify-center gap-2"
+              >
+                <MessageSquare size={16} />
+                Send Message Now
+              </button>
+            </div>
+          )}
+        </div>
+
+                {/* Tabs */}
+        <div className="flex gap-2 mb-4">
+          {['overview', 'progress', 'program'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-colors ${
+                activeTab === tab
+                  ? 'bg-gold-gradient text-carbon-900'
+                  : 'bg-carbon-800 text-gray-400 hover:bg-carbon-700'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* Hidden duplicate removed - was:
           <div className="bg-carbon-800/50 rounded-xl p-3 text-center">
             <p className="text-2xl font-black text-green-400" style={{ fontFamily: 'Oswald, sans-serif' }}>
               {client.gained}
@@ -967,7 +1062,7 @@ const CoachDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-32">
       <header className="sticky top-0 z-30 bg-carbon-900/90 backdrop-blur-lg border-b border-slate-800">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">

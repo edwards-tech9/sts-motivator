@@ -22,15 +22,60 @@ const mockExercises = [
 ];
 
 const warmupExercises = [
-  { name: 'Ankle Stretch w/ KB', prescription: '2×30s' },
-  { name: '90/90 Breathing', prescription: '2×10' },
-  { name: 'T-Spine Rotation', prescription: '2×10' },
+  {
+    name: 'Ankle Stretch w/ KB',
+    prescription: '2×30s',
+    description: 'Hold a kettlebell in front of you, step one foot forward into a deep lunge position. Drive your knee forward over your toes while keeping your heel down. This improves ankle dorsiflexion essential for squats.',
+    videoId: 'IikP_teeLkI',
+    type: 'warmup',
+    focus: 'Mobility'
+  },
+  {
+    name: '90/90 Breathing',
+    prescription: '2×10',
+    description: 'Lie on your back with hips and knees at 90 degrees, feet on a wall or box. Exhale fully, tuck your pelvis, and inhale deeply through your nose. Focus on rib cage expansion and core activation.',
+    videoId: 'uA2IxmMqE0M',
+    type: 'warmup',
+    focus: 'Activation'
+  },
+  {
+    name: 'T-Spine Rotation',
+    prescription: '2×10',
+    description: 'Start on all fours, place one hand behind your head. Rotate your elbow toward the opposite arm, then rotate up toward the ceiling. Keep hips square and move from mid-back only.',
+    videoId: 'gHTE5SaKQkY',
+    type: 'warmup',
+    focus: 'Mobility'
+  },
 ];
 
 const finisherExercises = [
-  { id: 'f1', name: 'Assisted Hip Airplanes', prescription: '2×10 each side', videoId: null },
-  { id: 'f2', name: 'Rolling Plank', prescription: '2×20 (10 each direction)', videoId: null },
-  { id: 'f3', name: 'Dead Bug', prescription: '2×10 each side', videoId: null },
+  {
+    id: 'f1',
+    name: 'Assisted Hip Airplanes',
+    prescription: '2×10 each side',
+    description: 'Single-leg hip stability exercise. Stand on one leg holding a wall, hinge forward and rotate your hips open and closed. Builds glute strength and hip mobility essential for squats and deadlifts.',
+    videoId: 'FyJMSP2n53Q',
+    type: 'finisher',
+    focus: 'Hip Stability'
+  },
+  {
+    id: 'f2',
+    name: 'Rolling Plank',
+    prescription: '2×20 (10 each direction)',
+    description: 'Core stability exercise combining front and side plank. From forearm plank, rotate to side plank, return to center, rotate to other side. Targets obliques and anti-rotation strength.',
+    videoId: 'Oyw9O7K_1tQ',
+    type: 'finisher',
+    focus: 'Core'
+  },
+  {
+    id: 'f3',
+    name: 'Dead Bug',
+    prescription: '2×10 each side',
+    description: 'Anti-extension core exercise. Lying on your back, extend opposite arm and leg while keeping your low back pressed into the floor. Builds core stability and motor control.',
+    videoId: 'g_BYB0R-4Ws',
+    type: 'finisher',
+    focus: 'Core'
+  },
 ];
 
 const Workout = ({ techMode, onToggleTechMode, onExit }) => {
@@ -192,7 +237,7 @@ const Workout = ({ techMode, onToggleTechMode, onExit }) => {
   const progress = (completedTotal / totalSets) * 100;
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-32">
       <header className="sticky top-0 z-30 bg-carbon-900/90 backdrop-blur-lg border-b border-slate-800">
         <div className="flex items-center justify-between p-4">
           <button
