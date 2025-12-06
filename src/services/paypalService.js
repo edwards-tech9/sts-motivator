@@ -226,9 +226,8 @@ export const sendPaymentRequestToClient = async (request) => {
   // 2. Use SendGrid, AWS SES, or similar service
   // 3. Track email delivery status
 
-  // For now, we'll simulate success and log the link
-  console.log('Payment link generated for client:', request.clientEmail);
-  console.log('Link:', link);
+  // For now, we'll simulate success
+  // In production, you would send an actual email here
 
   // Update request status
   updatePaymentRequestStatus(request.id, 'sent');

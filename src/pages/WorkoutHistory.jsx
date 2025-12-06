@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, TrendingUp, Dumbbell, Clock, Trophy } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Calendar, ChevronLeft, ChevronRight, TrendingUp, Dumbbell, Clock, Trophy, RefreshCw } from 'lucide-react';
 import { getWorkouts } from '../services/localStorage';
+import { getWorkoutHistory as getWorkoutHistoryFirestore, subscribeToWorkouts } from '../services/database';
+import { isFirebaseConfigured } from '../services/firebase';
 
 // Default mock data for demo
 const defaultWorkoutHistory = [
@@ -54,34 +56,77 @@ const WorkoutHistory = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [workouts, setWorkouts] = useState(defaultWorkoutHistory);
   const [selectedWorkout, setSelectedWorkout] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [dataSource, setDataSource] = useState('local'); // 'local', 'cloud', 'offline'
 
-  // Load workouts from localStorage and merge with defaults
+  // Transform raw workout data to display format
+  const transformWorkout = useCallback((w, index) => ({
+    id: w.id || `saved-${index}`,
+    date: w.date ? new Date(w.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+    name: w.name || 'Workout',
+    duration: w.duration || 0,
+    exercises: w.exercises?.length || 0,
+    totalSets: w.exercises?.reduce((acc, ex) => acc + (ex.sets?.length || 0), 0) || 0,
+    completedSets: w.exercises?.reduce((acc, ex) => acc + (ex.sets?.filter(s => s.completed !== false).length || 0), 0) || 0,
+    volume: w.exercises?.reduce((acc, ex) =>
+      acc + (ex.sets?.reduce((setAcc, s) => setAcc + ((s.weight || 0) * (s.reps || 0)), 0) || 0), 0) || 0,
+    prs: 0, // Would need PR tracking
+    rawData: w, // Keep original data for detail view
+  }), []);
+
+  // Load workouts from localStorage and Firestore
   useEffect(() => {
-    const savedWorkouts = getWorkouts();
-    if (savedWorkouts && savedWorkouts.length > 0) {
-      // Transform saved workouts to match our format
-      const transformedWorkouts = savedWorkouts.map((w, index) => ({
-        id: w.id || `saved-${index}`,
-        date: w.date ? new Date(w.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-        name: w.name || 'Workout',
-        duration: w.duration || 0,
-        exercises: w.exercises?.length || 0,
-        totalSets: w.exercises?.reduce((acc, ex) => acc + (ex.sets?.length || 0), 0) || 0,
-        completedSets: w.exercises?.reduce((acc, ex) => acc + (ex.sets?.filter(s => s.completed !== false).length || 0), 0) || 0,
-        volume: w.exercises?.reduce((acc, ex) =>
-          acc + (ex.sets?.reduce((setAcc, s) => setAcc + ((s.weight || 0) * (s.reps || 0)), 0) || 0), 0) || 0,
-        prs: 0, // Would need PR tracking
-        rawData: w, // Keep original data for detail view
-      }));
+    const loadWorkouts = async () => {
+      setIsLoading(true);
 
-      // Merge with defaults, putting saved workouts first
-      const existingDates = transformedWorkouts.map(w => w.date);
-      const filteredDefaults = defaultWorkoutHistory.filter(w => !existingDates.includes(w.date));
-      setWorkouts([...transformedWorkouts, ...filteredDefaults].sort((a, b) =>
-        new Date(b.date) - new Date(a.date)
-      ));
-    }
-  }, []);
+      try {
+        // First, load from localStorage (immediate, works offline)
+        const savedWorkouts = getWorkouts();
+        let allWorkouts = [];
+
+        if (savedWorkouts && savedWorkouts.length > 0) {
+          allWorkouts = savedWorkouts.map(transformWorkout);
+          setDataSource('local');
+        }
+
+        // Then, try to load from Firestore if configured
+        if (isFirebaseConfigured) {
+          try {
+            const { workouts: firestoreWorkouts, error } = await getWorkoutHistoryFirestore('demo');
+
+            if (!error && firestoreWorkouts && firestoreWorkouts.length > 0) {
+              const transformedFirestore = firestoreWorkouts.map(transformWorkout);
+
+              // Merge: Firestore workouts take precedence (they have more data)
+              const firestoreIds = new Set(transformedFirestore.map(w => w.id));
+              const uniqueLocal = allWorkouts.filter(w => !firestoreIds.has(w.id));
+              allWorkouts = [...transformedFirestore, ...uniqueLocal];
+              setDataSource('cloud');
+            }
+          } catch {
+            // Firestore failed, continue with localStorage data
+            setDataSource('offline');
+          }
+        }
+
+        // Merge with defaults
+        if (allWorkouts.length > 0) {
+          const existingDates = allWorkouts.map(w => w.date);
+          const filteredDefaults = defaultWorkoutHistory.filter(w => !existingDates.includes(w.date));
+          setWorkouts([...allWorkouts, ...filteredDefaults].sort((a, b) =>
+            new Date(b.date) - new Date(a.date)
+          ));
+        }
+      } catch {
+        // Error loading, use defaults
+        setDataSource('local');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadWorkouts();
+  }, [transformWorkout]);
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
